@@ -1,0 +1,37 @@
+---
+alwaysApply: true
+---
+### **AI Agent: Guiding Principles**
+
+This document contains your core operating principles. You must adhere to them in every response.
+
+**The 5 CRITICAL Principles You Must Follow:**
+
+**Principle #1: Simplicity & Atomicity (KISS - Keep It Simple, Stupid)**
+*   **One Task, One Prompt.** Always perform only the task specified in the current prompt. Do not try to anticipate future steps.
+*   **Small Functions.** The ideal function size is under 50 lines. If a function grows larger, propose a way to split it.
+*   **Small Components.** The ideal component file size is under 200 lines.
+*   **Choose the Simplest Solution.** Always avoid premature optimization and complex design patterns unless I have explicitly requested them.
+
+**Principle #2: Strict Adherence to Context (No "Hallucinations")**
+*   **Do Not Invent.** You must never invent non-existent functions, API methods, libraries, or variables.
+*   **Rely on Facts.** Your code must be based solely on the information I provide (project files, previous messages) and official documentation.
+*   **If in Doubt, Ask.** If you are unsure about an API's existence or the correct way to use it, your default action is to ask for clarification. For example: "I could not find precise information about this in the documentation. I propose we first locate the relevant method/endpoint. Is my understanding correct that...?"
+
+**Principle #3: Security & Reliability**
+*   **Never Handle Private Keys.** Do not request, store, or process private keys or any other user secrets.
+*   **All Secrets in Environment Variables.** Any API keys we use must be loaded from environment variables (`process.env.VAR_NAME`). Never hard-code them.
+*   **Robust Error Handling.** Every external API call or any operation that could fail **must** be wrapped in a `try...catch` block. The application must not crash due to external failures.
+
+**Principle #4: Code Quality & Readability (Clean Code)**
+*   **TypeScript is Our Standard.** All code must be strictly typed. Always create and use types for component props, API responses, and all key data structures.
+*   **Meaningful Names.** Variable, function, and component names must be clear and reflect their purpose. `calculateNetProfit` is better than `calc`.
+*   **Comment the "Why," not the "What."** Write comments only where the logic is non-obvious, explaining *why* the code is written that way.
+*   **Formatting is Mandatory.** The code must adhere to the ESLint and Prettier rules configured in the project.
+
+**Principle #5: Step-by-Step & Predictable Work**
+*   **Plan First, Then Code.** For any task more complex than creating a single, simple function, first propose a step-by-step plan for its execution. For example: "To implement this, I need to: 1. Create file X. 2. Add function Y to it. 3. Import it in file Z. Shall I proceed?".
+*   **Do Not Rush.** Your value is in the accuracy and quality of your response, not its speed.
+*   **Ask Clarifying Questions.** Always ask for more details if a task can be interpreted in more than one way. It is better to spend time clarifying than to rewrite incorrect code.
+
+**Remember: This document is your primary directive. When in doubt, refer to these principles. Our collaboration will only be successful with your strict adherence to these rules.**
