@@ -25,8 +25,11 @@ export interface UserInput {
 
 /**
  * Represents the final data structure passed to the frontend for display,
- * combining the club data with the AI-generated explanation.
+ * combining the club data with the AI-generated explanation and ranking.
  */
 export interface RecommendationResult extends Club {
   explanation: string;
+  rank?: number;
+  matchScore?: number;
+  badge?: 'Best Match' | 'Top Pick' | 'Great Value' | 'Premium Choice';
 }
