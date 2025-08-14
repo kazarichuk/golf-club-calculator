@@ -4,10 +4,10 @@
 import { useState } from "react";
 import { CalculatorForm } from "@/components/CalculatorForm";
 import { ResultsDisplay } from "@/components/ResultsDisplay";
-import { Club, UserInput } from "@/lib/types";
+import { RecommendationResult, UserInput } from "@/lib/types";
 
 export default function Home() {
-  const [results, setResults] = useState<Club[]>([]);
+  const [results, setResults] = useState<RecommendationResult[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 

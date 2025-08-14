@@ -10,10 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Club } from "@/lib/types";
+import { RecommendationResult } from "@/lib/types";
 
 interface ResultsDisplayProps {
-  results: Club[];
+  results: RecommendationResult[];
 }
 
 export function ResultsDisplay({ results }: ResultsDisplayProps) {
