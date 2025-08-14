@@ -28,25 +28,25 @@ export default function RootLayout({
         <style dangerouslySetInnerHTML={{
           __html: `
             :root {
-              --color-background: 222.2 84% 4.9%;
-              --color-foreground: 210 40% 98%;
-              --color-card: 222.2 84% 4.9%;
-              --color-card-foreground: 210 40% 98%;
-              --color-popover: 222.2 84% 4.9%;
-              --color-popover-foreground: 210 40% 98%;
-              --color-primary: 210 40% 98%;
-              --color-primary-foreground: 222.2 47.4% 11.2%;
-              --color-secondary: 217.2 32.6% 17.5%;
-              --color-secondary-foreground: 210 40% 98%;
-              --color-muted: 217.2 32.6% 17.5%;
-              --color-muted-foreground: 215 20.2% 65.1%;
-              --color-accent: 217.2 32.6% 17.5%;
-              --color-accent-foreground: 210 40% 98%;
-              --color-destructive: 0 62.8% 30.6%;
-              --color-destructive-foreground: 210 40% 98%;
-              --color-border: 217.2 32.6% 17.5%;
-              --color-input: 217.2 32.6% 17.5%;
-              --color-ring: 212.7 26.8% 83.9%;
+              --color-background: rgb(10, 10, 10);
+              --color-foreground: rgb(250, 250, 250);
+              --color-card: rgb(20, 20, 20);
+              --color-card-foreground: rgb(250, 250, 250);
+              --color-popover: rgb(20, 20, 20);
+              --color-popover-foreground: rgb(250, 250, 250);
+              --color-primary: rgb(250, 250, 250);
+              --color-primary-foreground: rgb(10, 10, 10);
+              --color-secondary: rgb(40, 40, 40);
+              --color-secondary-foreground: rgb(250, 250, 250);
+              --color-muted: rgb(40, 40, 40);
+              --color-muted-foreground: rgb(150, 150, 150);
+              --color-accent: rgb(40, 40, 40);
+              --color-accent-foreground: rgb(250, 250, 250);
+              --color-destructive: rgb(150, 50, 50);
+              --color-destructive-foreground: rgb(250, 250, 250);
+              --color-border: rgb(60, 60, 60);
+              --color-input: rgb(40, 40, 40);
+              --color-ring: rgb(200, 200, 200);
               --radius: 0.5rem;
             }
           `
