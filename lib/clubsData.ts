@@ -10,7 +10,7 @@ export const clubsData: Club[] = [
     handicapRange: [5, 15],
     keyStrengths: ['Distance', 'Feel'],
     pricePoint: 'Premium',
-    imageUrl: '/images/placeholder.png'
+    imageUrl: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=400&h=300&fit=crop&crop=center'
   },
   {
     id: 'callaway_rogue_st_max',
@@ -20,7 +20,7 @@ export const clubsData: Club[] = [
     handicapRange: [15, 30],
     keyStrengths: ['Forgiveness', 'Distance'],
     pricePoint: 'Mid-range',
-    imageUrl: '/images/placeholder.png'
+    imageUrl: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=400&h=300&fit=crop&crop=center'
   },
   {
     id: 'mizuno_jpx_923_forged',
@@ -30,7 +30,7 @@ export const clubsData: Club[] = [
     handicapRange: [8, 18],
     keyStrengths: ['Feel', 'Workability'],
     pricePoint: 'Premium',
-    imageUrl: '/images/placeholder.png'
+    imageUrl: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=400&h=300&fit=crop&crop=center'
   },
   {
     id: 'taylormade_p790_2023',
@@ -40,7 +40,7 @@ export const clubsData: Club[] = [
     handicapRange: [5, 15],
     keyStrengths: ['Distance', 'Forgiveness'],
     pricePoint: 'Premium',
-    imageUrl: '/images/placeholder.png'
+    imageUrl: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=400&h=300&fit=crop&crop=center'
   },
   {
     id: 'ping_g430',
@@ -50,7 +50,7 @@ export const clubsData: Club[] = [
     handicapRange: [12, 30],
     keyStrengths: ['Forgiveness', 'Distance'],
     pricePoint: 'Mid-range',
-    imageUrl: '/images/placeholder.png'
+    imageUrl: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=400&h=300&fit=crop&crop=center'
   },
   {
     id: 'wilson_staff_model_blade',
@@ -60,6 +60,6 @@ export const clubsData: Club[] = [
     handicapRange: [0, 8],
     keyStrengths: ['Feel', 'Workability'],
     pricePoint: 'Premium',
-    imageUrl: '/images/placeholder.png'
+    imageUrl: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=400&h=300&fit=crop&crop=center'
   }
 ];

@@ -80,8 +80,8 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                         alt={`${club.brand} ${club.model}`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          // Fallback to placeholder if image fails to load
-                          e.currentTarget.src = '/images/placeholder.png';
+                          // Fallback to a simple golf club icon if image fails to load
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgNzBDMTQwIDcwIDkwIDEyMCA5MCAxODBDOTAgMjQwIDE0MCAyOTAgMjAwIDI5MEMyNjAgMjkwIDMxMCAyNDAgMzEwIDE4MEMzMTAgMTIwIDI2MCA3MCAyMDAgNzBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8cGF0aCBkPSJNMTgwIDE0MEgyMjBWMjAwSDE4MFYxNDBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8dGV4dCB4PSIyMDAiIHk9IjI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjc3Mzc1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Hb2xmIENsdWI8L3RleHQ+Cjwvc3ZnPgo=';
                         }}
                       />
                     </div>
