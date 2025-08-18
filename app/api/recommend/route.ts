@@ -115,7 +115,7 @@ Return only the JSON response, no additional text.`;
     let openaiRecommendation: OpenAIClubRecommendation;
     try {
       openaiRecommendation = JSON.parse(responseText);
-    } catch (error) {
+    } catch {
       console.error('Failed to parse OpenAI response:', responseText);
       throw new Error('Invalid response format from OpenAI');
     }

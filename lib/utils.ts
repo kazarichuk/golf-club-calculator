@@ -9,7 +9,19 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Convert database club format to frontend club format
  */
-export function dbClubToClub(dbClub: any): Club {
+export function dbClubToClub(dbClub: {
+  id: number;
+  brand: string;
+  model: string;
+  category: string;
+  handicapRangeMin: number;
+  handicapRangeMax: number;
+  keyStrengths: string[];
+  pricePoint: string;
+  imageUrl: string;
+  createdAt: Date;
+  updatedAt: Date;
+}): Club {
   return {
     id: dbClub.id.toString(),
     brand: dbClub.brand,
