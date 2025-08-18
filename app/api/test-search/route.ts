@@ -43,8 +43,9 @@ export async function GET() {
     
   } catch (error) {
     console.error('Search test failed:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { message: 'Search test failed', error: error.message },
+      { message: 'Search test failed', error: message },
       { status: 500 }
     );
   }
