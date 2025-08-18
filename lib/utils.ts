@@ -9,15 +9,15 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Convert database club format to frontend club format
  */
-export function dbClubToClub(dbClub: DbClub): Club {
+export function dbClubToClub(dbClub: any): Club {
   return {
     id: dbClub.id.toString(),
     brand: dbClub.brand,
     model: dbClub.model,
-    category: dbClub.category,
+    category: dbClub.category as 'Game Improvement' | "Player's Distance" | "Player's Iron" | 'Blade',
     handicapRange: [dbClub.handicapRangeMin, dbClub.handicapRangeMax],
-    keyStrengths: dbClub.keyStrengths,
-    pricePoint: dbClub.pricePoint,
+    keyStrengths: dbClub.keyStrengths as ('Forgiveness' | 'Distance' | 'Feel' | 'Workability')[],
+    pricePoint: dbClub.pricePoint as 'Budget' | 'Mid-range' | 'Premium',
     imageUrl: dbClub.imageUrl,
   };
 }
