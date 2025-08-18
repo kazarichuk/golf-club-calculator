@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       .orderBy(schema.recommendationCache.createdAt)
       .limit(1);
 
-    if (cachedResult.length > 0) {
+    if (cachedResult.length > 0 && cachedResult[0].recommendedIds.length > 0) {
       console.log('Cache hit - returning cached recommendations');
       
       // Get the cached club IDs
@@ -159,14 +159,30 @@ Return only the JSON response, no additional text.`;
       
       // Get all clubs and filter manually
       const allClubs = await db.select().from(schema.manufacturs);
-      console.log('All clubs:', allClubs.map(c => c.model));
+      console.log('Searching for club:', modelName);
       
-      // Find matching club manually
-      const matchingClub = allClubs.find(club => 
-        club.model.toLowerCase() === modelName.toLowerCase() ||
-        club.model.toLowerCase().includes(modelName.toLowerCase()) ||
-        modelName.toLowerCase().includes(club.model.toLowerCase())
-      );
+      // Find matching club manually with more flexible matching
+      const matchingClub = allClubs.find(club => {
+        const clubModel = club.model.toLowerCase();
+        const searchModel = modelName.toLowerCase();
+        
+        // Exact match
+        if (clubModel === searchModel) return true;
+        
+        // Contains match
+        if (clubModel.includes(searchModel) || searchModel.includes(clubModel)) return true;
+        
+        // Brand + model match (e.g., "Callaway Rogue ST Max" matches "Rogue ST Max")
+        const clubWords = clubModel.split(' ');
+        const searchWords = searchModel.split(' ');
+        
+        // Check if search words are contained in club model
+        const hasAllSearchWords = searchWords.every(word => 
+          clubWords.some(clubWord => clubWord.includes(word) || word.includes(clubWord))
+        );
+        
+        return hasAllSearchWords;
+      });
       
       console.log('Matching club found:', matchingClub ? matchingClub.model : 'None');
       

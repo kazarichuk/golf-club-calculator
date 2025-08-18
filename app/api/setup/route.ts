@@ -16,9 +16,10 @@ export async function POST() {
 
     console.log('Starting database setup...');
     
-    // Clear existing data (optional - remove if you want to keep existing data)
+    // Clear existing data and cache
     await db.delete(schema.manufacturs);
-    console.log('Cleared existing data');
+    await db.delete(schema.recommendationCache);
+    console.log('Cleared existing data and cache');
     
     // Insert clubs data
     const insertPromises = clubsData.map(club => {
