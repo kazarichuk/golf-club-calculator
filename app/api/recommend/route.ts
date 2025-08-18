@@ -186,8 +186,8 @@ Return only the JSON response, no additional text.`;
 
     return NextResponse.json(enrichedResults);
 
-  } catch (error) {
-    console.error('API Error:', error);
+  } catch (err) {
+    console.error('API Error:', err);
     return NextResponse.json(
       { message: 'Error processing your request.' },
       { status: 500 }

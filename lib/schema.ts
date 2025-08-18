@@ -1,5 +1,5 @@
 // /lib/schema.ts
-import { pgTable, serial, varchar, integer, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, integer, timestamp } from 'drizzle-orm/pg-core';
 
 /**
  * Table for storing golf club manufacturers and their products
