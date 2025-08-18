@@ -4,7 +4,7 @@ import { UserInput, RecommendationResult, OpenAIClubRecommendation } from '@/lib
 import { db, schema } from '@/lib/db';
 import { dbClubToClub } from '@/lib/utils';
 import OpenAI from 'openai';
-import { eq, and, ilike, inArray } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 
 export async function POST(request: Request) {
   try {

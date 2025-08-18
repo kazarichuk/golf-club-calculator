@@ -47,6 +47,7 @@ Return only the JSON response, no additional text.`;
     });
   } catch (error) {
     console.error('OpenAI test failed:', error);
-    return NextResponse.json({ error: 'OpenAI test failed', details: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: 'OpenAI test failed', details: message }, { status: 500 });
   }
 }
