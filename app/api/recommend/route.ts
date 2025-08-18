@@ -8,6 +8,23 @@ import { eq, and, ilike, inArray } from 'drizzle-orm';
 
 export async function POST(request: Request) {
   try {
+    // Check for required environment variables
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('Missing OPENAI_API_KEY environment variable');
+      return NextResponse.json(
+        { message: 'OpenAI API key not configured. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
+    if (!process.env.DATABASE_URL) {
+      console.error('Missing DATABASE_URL environment variable');
+      return NextResponse.json(
+        { message: 'Database connection not configured. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const userInput: UserInput = await request.json();
     
