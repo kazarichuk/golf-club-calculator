@@ -95,7 +95,15 @@ export async function POST(request: Request) {
     // Step B: Query OpenAI (Cache Miss)
     console.log('Cache miss - querying OpenAI');
     
-    const openaiPrompt = `You are a world-class golf club fitting expert. Based on the following criteria, recommend 3-5 specific golf club models that would be ideal for this player:
+    const openaiPrompt = `You are a world-class golf club fitting expert. Based on the following criteria, recommend 3-5 specific golf club models from this exact list:
+
+AVAILABLE CLUBS:
+- Titleist T200 (2023)
+- Callaway Rogue ST Max
+- Mizuno JPX 923 Forged
+- TaylorMade P790 (2023)
+- Ping G430
+- Wilson Staff Model Blade
 
 Player Profile:
 - Handicap: ${userInput.handicap}
@@ -104,15 +112,16 @@ Player Profile:
 
 Please return your response as a JSON object with this exact structure:
 {
-  "modelNames": ["Brand Model Name", "Brand Model Name", "Brand Model Name"],
+  "modelNames": ["Exact Brand Model Name", "Exact Brand Model Name", "Exact Brand Model Name"],
   "reasoning": "Brief explanation of your recommendations"
 }
+
+IMPORTANT: Only use the exact model names from the list above. Do not suggest any other models.
 
 Focus on clubs that are:
 1. Appropriate for the player's handicap level
 2. Aligned with their primary goal (${userInput.goal})
 3. Within their budget range (${userInput.budget})
-4. From well-known, reputable brands
 
 Return only the JSON response, no additional text.`;
 
@@ -132,6 +141,7 @@ Return only the JSON response, no additional text.`;
     let openaiRecommendation: OpenAIClubRecommendation;
     try {
       openaiRecommendation = JSON.parse(responseText);
+      console.log('OpenAI response:', openaiRecommendation);
     } catch {
       console.error('Failed to parse OpenAI response:', responseText);
       throw new Error('Invalid response format from OpenAI');
@@ -145,14 +155,24 @@ Return only the JSON response, no additional text.`;
 
     // Search for each recommended club by model name
     for (const modelName of openaiRecommendation.modelNames) {
-      const clubs = await db
-        .select()
-        .from(schema.manufacturs)
-        .where(ilike(schema.manufacturs.model, `%${modelName}%`));
+      console.log('Searching for club:', modelName);
       
-      if (clubs.length > 0) {
-        foundClubs.push(clubs[0]); // Take the first match
-        foundIds.push(clubs[0].id);
+      // Get all clubs and filter manually
+      const allClubs = await db.select().from(schema.manufacturs);
+      console.log('All clubs:', allClubs.map(c => c.model));
+      
+      // Find matching club manually
+      const matchingClub = allClubs.find(club => 
+        club.model.toLowerCase() === modelName.toLowerCase() ||
+        club.model.toLowerCase().includes(modelName.toLowerCase()) ||
+        modelName.toLowerCase().includes(club.model.toLowerCase())
+      );
+      
+      console.log('Matching club found:', matchingClub ? matchingClub.model : 'None');
+      
+      if (matchingClub) {
+        foundClubs.push(matchingClub);
+        foundIds.push(matchingClub.id);
       }
     }
 

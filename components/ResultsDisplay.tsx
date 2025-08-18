@@ -70,6 +70,23 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                     </Badge>
                   )}
                 </div>
+                
+                {/* Golf Club Image */}
+                {club.imageUrl && (
+                  <div className="mt-4 flex justify-center">
+                    <div className="relative w-full h-48 bg-muted rounded-lg overflow-hidden">
+                      <img
+                        src={club.imageUrl}
+                        alt={`${club.brand} ${club.model}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback to placeholder if image fails to load
+                          e.currentTarget.src = '/images/placeholder.png';
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
               </CardHeader>
               
               <CardContent className="space-y-3">
@@ -100,20 +117,11 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                 )}
               </CardContent>
               
-              <CardFooter className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => window.open(`https://www.google.com/search?q=${club.brand}+${club.model}+golf+clubs+review`, '_blank')}
-                >
-                  Reviews
-                </Button>
-                <Button 
-                  size="sm"
-                  onClick={() => window.open(`https://www.google.com/search?q=${club.brand}+${club.model}+golf+clubs+price`, '_blank')}
-                >
-                  Find Price
-                </Button>
+              {/* Removed buttons - keeping footer for spacing */}
+              <CardFooter className="pt-0">
+                <div className="w-full text-center text-xs text-muted-foreground">
+                  Match Score: {club.matchScore}%
+                </div>
               </CardFooter>
             </Card>
           ))
