@@ -15,6 +15,23 @@ export interface Club {
 }
 
 /**
+ * Database version of Club with numeric ID and separate handicap range fields
+ */
+export interface DbClub {
+  id: number;
+  brand: string;
+  model: string;
+  category: 'Game Improvement' | "Player's Distance" | "Player's Iron" | 'Blade';
+  handicapRangeMin: number;
+  handicapRangeMax: number;
+  keyStrengths: ('Forgiveness' | 'Distance' | 'Feel' | 'Workability')[];
+  pricePoint: 'Budget' | 'Mid-range' | 'Premium';
+  imageUrl: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
  * Represents the data captured from the user in the calculator form.
  */
 export interface UserInput {
@@ -32,4 +49,12 @@ export interface RecommendationResult extends Club {
   rank?: number;
   matchScore?: number;
   badge?: 'Best Match' | 'Top Pick' | 'Great Value' | 'Premium Choice';
+}
+
+/**
+ * OpenAI API response structure for club recommendations
+ */
+export interface OpenAIClubRecommendation {
+  modelNames: string[];
+  reasoning: string;
 }
