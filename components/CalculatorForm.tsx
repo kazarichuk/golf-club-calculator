@@ -23,8 +23,8 @@ interface CalculatorFormProps {
 
 export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
   const [userInput, setUserInput] = useState<UserInput>({
-    handicap: 'Beginner',
-    goal: 'Improve Forgiveness',
+    handicap: 20,
+    goal: 'Forgiveness',
     budget: 'Mid-range'
   });
 
@@ -40,35 +40,19 @@ export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
         {/* Handicap Section */}
         <div className="grid gap-2">
           <Label htmlFor="handicap">What is your current Handicap?</Label>
-          <RadioGroup value={userInput.handicap} onValueChange={(value) => setUserInput(prev => ({ ...prev, handicap: value as UserInput['handicap'] }))} className="grid grid-cols-3 gap-4">
-            <div>
-              <RadioGroupItem value="Beginner" id="h-beginner" className="peer sr-only" />
-              <Label
-                htmlFor="h-beginner"
-                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-              >
-                Beginner
-              </Label>
-            </div>
-            <div>
-              <RadioGroupItem value="Intermediate" id="h-intermediate" className="peer sr-only" />
-              <Label
-                htmlFor="h-intermediate"
-                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-              >
-                Intermediate
-              </Label>
-            </div>
-            <div>
-              <RadioGroupItem value="Advanced" id="h-advanced" className="peer sr-only" />
-              <Label
-                htmlFor="h-advanced"
-                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-              >
-                Advanced
-              </Label>
-            </div>
-          </RadioGroup>
+          <div className="flex items-center gap-4">
+            <Slider
+              id="handicap"
+              value={[userInput.handicap]}
+              onValueChange={(value) => setUserInput(prev => ({ ...prev, handicap: value[0] }))}
+              max={30}
+              step={1}
+              className="flex-1"
+            />
+            <span className="font-bold text-lg w-10 text-center rounded-md border p-2">
+              {userInput.handicap}
+            </span>
+          </div>
         </div>
 
         {/* Goal Section */}
@@ -76,7 +60,7 @@ export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
           <Label>What is your primary goal?</Label>
           <RadioGroup value={userInput.goal} onValueChange={(value) => setUserInput(prev => ({ ...prev, goal: value as UserInput['goal'] }))} className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <RadioGroupItem value="Improve Forgiveness" id="g-forgiveness" className="peer sr-only" />
+              <RadioGroupItem value="Forgiveness" id="g-forgiveness" className="peer sr-only" />
               <Label
                 htmlFor="g-forgiveness"
                 className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
@@ -85,7 +69,7 @@ export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
               </Label>
             </div>
             <div>
-              <RadioGroupItem value="Improve Distance" id="g-distance" className="peer sr-only" />
+              <RadioGroupItem value="Distance" id="g-distance" className="peer sr-only" />
               <Label
                 htmlFor="g-distance"
                 className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
@@ -94,7 +78,7 @@ export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
               </Label>
             </div>
             <div>
-              <RadioGroupItem value="Improve Accuracy" id="g-accuracy" className="peer sr-only" />
+              <RadioGroupItem value="Accuracy" id="g-accuracy" className="peer sr-only" />
               <Label
                 htmlFor="g-accuracy"
                 className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
@@ -103,7 +87,7 @@ export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
               </Label>
             </div>
             <div>
-              <RadioGroupItem value="Improve Feel" id="g-feel" className="peer sr-only" />
+              <RadioGroupItem value="Feel" id="g-feel" className="peer sr-only" />
               <Label
                 htmlFor="g-feel"
                 className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"

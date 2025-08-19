@@ -24,7 +24,7 @@ export const manufacturs = pgTable('manufacturs', {
  */
 export const recommendationCache = pgTable('recommendation_cache', {
   id: serial('id').primaryKey(),
-  handicap: varchar('handicap', { length: 50 }).notNull(), // 'Beginner' | 'Intermediate' | 'Advanced'
+  handicap: integer('handicap').notNull(), // Numeric handicap value
   goal: varchar('goal', { length: 50 }).notNull(), // 'Distance' | 'Accuracy' | 'Forgiveness' | 'Feel'
   budget: varchar('budget', { length: 20 }).notNull(), // 'Budget' | 'Mid-range' | 'Premium'
   recommendedIds: integer('recommended_ids').array().notNull(), // Array of club IDs from manufacturs table
