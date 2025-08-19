@@ -224,47 +224,74 @@ Return only the JSON response, no additional text.`;
       
       for (const name of missingClubNames) {
         try {
-          console.log(`Searching for image: "${name}" golf club iron`);
+          console.log(`Processing missing club: "${name}" - starting two-factor enrichment`);
           
-          // Search for image using SerpApi with callback approach
-          const search = new GoogleSearch(process.env.SERPAPI_API_KEY);
-          const searchResults = await new Promise<any>((resolve, reject) => {
-            search.json({
-              q: `${name} golf club iron`,
-              engine: 'google_images',
-              num: 1
-            }, (data: any) => {
-              if (data.error) {
-                reject(new Error(data.error));
-              } else {
-                resolve(data);
-              }
-            });
-          });
+          // Step 1: Perform Two Parallel API Calls
+          const [searchResults, openaiData] = await Promise.all([
+            // Call 1: SerpApi for image
+            new Promise<any>((resolve, reject) => {
+              const search = new GoogleSearch(process.env.SERPAPI_API_KEY);
+              search.json({
+                q: `${name} golf club iron`,
+                engine: 'google_images',
+                num: 1
+              }, (data: any) => {
+                if (data.error) {
+                  reject(new Error(data.error));
+                } else {
+                  resolve(data);
+                }
+              });
+            }),
+            
+            // Call 2: OpenAI for structured data
+            (async () => {
+              const dataPrompt = `You are a golf equipment data expert. For the club named "${name}", provide a JSON object with the following keys: "category" (one of ["Game Improvement", "Player's Distance", "Player's Iron", "Blade"]), "handicapRangeMin" (number), "handicapRangeMax" (number), "keyStrengths" (an array of strings), and "pricePoint" (one of ["Budget", "Mid-range", "Premium"]). Return ONLY the valid JSON object.`;
+              
+              const completion = await openai.chat.completions.create({
+                model: "gpt-3.5-turbo",
+                messages: [{ role: 'user', content: dataPrompt }],
+                max_tokens: 200,
+              });
+              
+              return completion.choices[0].message.content;
+            })()
+          ]);
           
-          // Validate search results
+          // Step 2: Consolidate and Validate Data
+          // Validate SerpApi results
           if (!searchResults || !searchResults.images_results) {
             console.log(`WARNING: Invalid search results for "${name}"`);
             continue;
           }
           
-          // Safely extract the URL of the first image
           const imageUrl = searchResults.images_results?.[0]?.original;
           
-          if (imageUrl) {
+          // Validate OpenAI results and parse JSON
+          let jsonData;
+          try {
+            jsonData = JSON.parse(openaiData || '{}');
+            console.log(`OpenAI structured data for "${name}":`, jsonData);
+          } catch (parseError) {
+            console.log(`WARNING: Invalid JSON response from OpenAI for "${name}":`, openaiData);
+            continue;
+          }
+          
+          // Step 3: Insert Complete Record into Database
+          if (imageUrl && jsonData.category && jsonData.handicapRangeMin !== undefined) {
             // Extract brand from name (first word) - handle edge cases
             const nameParts = name.split(' ');
             const brand = nameParts.length > 1 ? nameParts[0] : 'Unknown';
             
-            // Insert new club into database
+            // Insert new club into database with complete data
             const [newClub] = await db.insert(schema.manufacturs).values({
               brand: brand,
               model: name,
-              category: 'Game Improvement', // Default category
-              handicapRangeMin: 0, // Default values
-              handicapRangeMax: 25,
-              keyStrengths: ['Distance', 'Forgiveness'], // Default strengths
-              pricePoint: 'Mid-range', // Default price point
+              category: jsonData.category,
+              handicapRangeMin: jsonData.handicapRangeMin,
+              handicapRangeMax: jsonData.handicapRangeMax,
+              keyStrengths: jsonData.keyStrengths || ['Distance', 'Forgiveness'],
+              pricePoint: jsonData.pricePoint || 'Mid-range',
               imageUrl: imageUrl,
             }).returning();
             
@@ -272,9 +299,9 @@ Return only the JSON response, no additional text.`;
             newlyCreatedClubs.push(newClub);
             foundIds.push(newClub.id);
             
-            console.log(`SUCCESS: Found image for "${name}" and created new DB entry.`);
+            console.log(`SUCCESS: Two-factor enrichment complete for "${name}" - image found and structured data saved to database`);
           } else {
-            console.log(`WARNING: No image found for "${name}"`);
+            console.log(`WARNING: Missing required data for "${name}" - imageUrl: ${!!imageUrl}, category: ${!!jsonData.category}`);
           }
         } catch (error) {
           console.error(`ERROR: Failed to process "${name}":`, error);
