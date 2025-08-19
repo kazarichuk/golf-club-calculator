@@ -111,8 +111,8 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                   </div>
                   
                   {club.explanation && (
-                    <div className="mt-3 p-3 bg-muted/50 rounded-lg h-24 overflow-hidden">
-                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">
+                    <div className="mt-3 p-3 bg-muted/50 rounded-lg h-[360px] overflow-y-auto">
+                      <p className="text-sm text-muted-foreground leading-relaxed">
                         {club.explanation}
                       </p>
                     </div>
