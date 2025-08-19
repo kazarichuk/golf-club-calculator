@@ -73,7 +73,7 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                 {/* Golf Club Image */}
                 {club.imageUrl && (
                   <div className="mt-4 flex justify-center">
-                    <div className="w-full h-48 bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                    <div className="w-full h-48 bg-white rounded-lg overflow-hidden flex items-center justify-center">
                       <Image
                         src={club.imageUrl}
                         alt={`${club.brand} ${club.model}`}
