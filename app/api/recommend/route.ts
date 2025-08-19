@@ -7,7 +7,7 @@ import OpenAI from 'openai';
 import { eq, and, inArray } from 'drizzle-orm';
 
 // Import SerpApi with type assertion
-const { getJson } = require('google-search-results-nodejs');
+const { GoogleSearch } = require('google-search-results-nodejs');
 
 export async function POST(request: Request) {
   try {
@@ -232,6 +232,11 @@ Return only the JSON response, no additional text.`;
       missing: missingClubNames,
     });
 
+    console.log('DEBUG: Preparing to search for missing clubs.');
+    console.log('DEBUG: OpenAI Recommendations:', openaiRecommendation.modelNames);
+    console.log('DEBUG: Clubs found in DB:', existingClubs.map(c => c.model));
+    console.log('DEBUG: Clubs identified as MISSING:', missingClubNames);
+
     // Step D: Handle Missing Clubs with SerpApi
     const newlyCreatedClubs: typeof schema.manufacturs.$inferSelect[] = [];
     
@@ -243,9 +248,9 @@ Return only the JSON response, no additional text.`;
           console.log(`Searching for image: "${name}" golf club iron`);
           
           // Search for image using SerpApi
-          const searchResults = await getJson({
+          const search = new GoogleSearch(process.env.SERPAPI_API_KEY);
+          const searchResults = await search.json({
             q: `${name} golf club iron`,
-            api_key: process.env.SERPAPI_API_KEY,
             engine: 'google_images',
             num: 1
           });
