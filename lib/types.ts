@@ -35,8 +35,8 @@ export interface DbClub {
  * Represents the data captured from the user in the calculator form.
  */
 export interface UserInput {
-  handicap: number;
-  goal: 'Distance' | 'Accuracy' | 'Forgiveness' | 'Feel';
+  handicap: 'Beginner' | 'Intermediate' | 'Advanced';
+  goal: 'Improve Distance' | 'Improve Accuracy' | 'Improve Forgiveness' | 'Improve Feel';
   budget: 'Budget' | 'Mid-range' | 'Premium';
 }
 

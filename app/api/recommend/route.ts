@@ -41,67 +41,8 @@ export async function POST(request: Request) {
     
     console.log('Received user input:', userInput);
     
-    // Step A: Check Cache
-    const cachedResult = await db
-      .select()
-      .from(schema.recommendationCache)
-      .where(
-        and(
-          eq(schema.recommendationCache.handicap, userInput.handicap),
-          eq(schema.recommendationCache.goal, userInput.goal),
-          eq(schema.recommendationCache.budget, userInput.budget)
-        )
-      )
-      .orderBy(schema.recommendationCache.createdAt)
-      .limit(1);
-
-    if (cachedResult.length > 0 && cachedResult[0].recommendedIds.length > 0) {
-      console.log('Cache hit - returning cached recommendations');
-      
-      // Get the cached club IDs
-      const cachedIds = cachedResult[0].recommendedIds;
-      
-      // Query the manufacturs table to get full club data including imageUrl
-      const cachedClubs = await db
-        .select()
-        .from(schema.manufacturs)
-        .where(inArray(schema.manufacturs.id, cachedIds));
-      
-      // Convert to frontend format and create enriched results
-      const enrichedResults: RecommendationResult[] = await Promise.all(
-        cachedClubs.map(async (dbClub, index) => {
-          const club = dbClubToClub(dbClub);
-          
-          // Determine badge based on rank
-          let badge: RecommendationResult['badge'];
-          if (index === 0) badge = 'Best Match';
-          else if (index === 1) badge = 'Top Pick';
-          else if (club.pricePoint === 'Budget') badge = 'Great Value';
-          else if (club.pricePoint === 'Premium') badge = 'Premium Choice';
-          
-          // Generate explanation for cached result
-          const prompt = `You are a world-class golf club fitting expert. A user with a handicap of ${userInput.handicap} whose main goal is ${userInput.goal} and budget is ${userInput.budget} has been recommended the ${club.brand} ${club.model}. Explain in 2-3 concise sentences why this specific club is an excellent choice for this user, referencing their goal, handicap, and budget.`;
-
-          const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: 'user', content: prompt }],
-            max_tokens: 120,
-          });
-
-          const explanation = completion.choices[0].message.content;
-
-          return {
-            ...club,
-            explanation: explanation || 'No explanation available',
-            rank: index + 1,
-            matchScore: 100 - (index * 15),
-            badge
-          };
-        })
-      );
-
-      return NextResponse.json(enrichedResults);
-    }
+    // Step A: Check Cache (temporarily disabled due to database schema issues)
+    console.log('Cache check temporarily disabled - proceeding to OpenAI query');
 
     // Step B: Query OpenAI (Cache Miss)
     console.log('Cache miss - querying OpenAI');
@@ -112,12 +53,12 @@ export async function POST(request: Request) {
     // Create a list of available clubs for OpenAI
     const availableClubsList = allClubs.map(club => `${club.brand} ${club.model}`).join('\n- ');
     
-    const searchPrompt = `You are a golf expert assistant. Using web search, find the top 3 most recommended golf iron sets in 2025 for a player with a handicap of ${userInput.handicap} whose primary goal is ${userInput.goal}. Return ONLY a valid JSON array of the model names. Example: ["TaylorMade Qi10", "Callaway Paradym Ai Smoke", "Titleist T200 2025"]`;
+    const searchPrompt = `You are a golf expert assistant. Find the top 3 most recommended golf iron sets in 2025 for a player with a handicap of ${userInput.handicap} whose primary goal is ${userInput.goal}. Return ONLY a valid JSON array of the model names. Example: ["TaylorMade Qi10", "Callaway Paradym Ai Smoke", "Titleist T200 2025"]`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // Use a model that supports web search well
       messages: [{ role: 'user', content: searchPrompt }],
-      response_format: { type: "json_object" }, // Ensure the output is parsable
+      max_tokens: 500,
     });
 
     const responseText = completion.choices[0].message.content;
@@ -128,12 +69,15 @@ export async function POST(request: Request) {
     // Parse OpenAI response - new format returns array directly
     let modelNames: string[];
     try {
+      console.log('Raw OpenAI response:', responseText);
       const parsedResponse = JSON.parse(responseText);
+      console.log('Parsed OpenAI response:', parsedResponse);
       // Handle both array format and object format for backward compatibility
       modelNames = Array.isArray(parsedResponse) ? parsedResponse : parsedResponse.modelNames || [];
       console.log('OpenAI web search response - model names:', modelNames);
-    } catch {
+    } catch (parseError) {
       console.error('Failed to parse OpenAI response:', responseText);
+      console.error('Parse error:', parseError);
       throw new Error('Invalid response format from OpenAI');
     }
 
@@ -290,17 +234,8 @@ export async function POST(request: Request) {
     // Combine existing and newly created clubs
     const finalResults = [...existingClubs, ...newlyCreatedClubs];
 
-    // If we found clubs, save to cache
-    if (finalResults.length > 0) {
-      await db.insert(schema.recommendationCache).values({
-        handicap: userInput.handicap,
-        goal: userInput.goal,
-        budget: userInput.budget,
-        recommendedIds: foundIds,
-      });
-      
-      console.log(`Cached ${finalResults.length} recommendations`);
-    }
+    // Cache insertion temporarily disabled due to database schema issues
+    console.log(`Would cache ${finalResults.length} recommendations (cache disabled)`);
 
     // Create enriched results
     const enrichedResults: RecommendationResult[] = await Promise.all(
@@ -338,9 +273,15 @@ export async function POST(request: Request) {
     return NextResponse.json(enrichedResults);
 
   } catch (err) {
-    console.error('API Error:', err);
+    const error = err as Error;
+    console.error('API Error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return NextResponse.json(
-      { message: 'Error processing your request.' },
+      { message: 'Error processing your request.', error: error.message },
       { status: 500 }
     );
   }
