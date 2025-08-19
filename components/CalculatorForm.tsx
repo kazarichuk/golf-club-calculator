@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { UserInput } from "@/lib/types";
+import { Loader2 } from "lucide-react";
 
 interface CalculatorFormProps {
   onSubmit: (input: UserInput) => void;
@@ -29,7 +30,15 @@ export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
   });
 
   return (
-    <Card className="w-full max-w-lg mx-auto">
+    <Card className="w-full max-w-lg mx-auto relative">
+      {isLoading && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Analyzing your preferences...</p>
+          </div>
+        </div>
+      )}
       <CardHeader>
         <CardTitle>Golf Club Recommendation Calculator</CardTitle>
         <CardDescription>
@@ -139,7 +148,14 @@ export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
           onClick={() => onSubmit(userInput)}
           disabled={isLoading}
         >
-          {isLoading ? 'Getting Recommendations...' : 'Get My Recommendations'}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Getting Recommendations...
+            </>
+          ) : (
+            'Get My Recommendations'
+          )}
         </Button>
       </CardFooter>
     </Card>
