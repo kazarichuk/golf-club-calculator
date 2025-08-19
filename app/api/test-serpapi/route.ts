@@ -13,11 +13,11 @@ export async function GET(request: Request) {
     console.log('TEST SERPAPI: API Key (first 10 chars):', process.env.SERPAPI_API_KEY?.substring(0, 10));
     
     // Use callback approach for SerpApi
-    const searchResults = await new Promise((resolve, reject) => {
+    const searchResults = await new Promise<any>((resolve, reject) => {
       search.json({
         engine: "google_images",
         q: "TaylorMade P790 golf club",
-      }, (data) => {
+      }, (data: any) => {
         if (data.error) {
           reject(new Error(data.error));
         } else {
