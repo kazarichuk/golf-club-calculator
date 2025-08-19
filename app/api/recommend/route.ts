@@ -112,36 +112,12 @@ export async function POST(request: Request) {
     // Create a list of available clubs for OpenAI
     const availableClubsList = allClubs.map(club => `${club.brand} ${club.model}`).join('\n- ');
     
-    const openaiPrompt = `You are a world-class golf club fitting expert. Based on the following criteria, recommend 3-5 specific golf club models from this exact list:
-
-AVAILABLE CLUBS:
-- ${availableClubsList}
-
-Player Profile:
-- Handicap: ${userInput.handicap}
-- Primary Goal: ${userInput.goal}
-- Budget: ${userInput.budget}
-
-Please return your response as a JSON object with this exact structure:
-{
-  "modelNames": ["Exact Brand Model Name", "Exact Brand Model Name", "Exact Brand Model Name"],
-  "reasoning": "Brief explanation of your recommendations"
-}
-
-IMPORTANT: Only use the exact model names from the list above. Do not suggest any other models.
-
-Focus on clubs that are:
-1. Appropriate for the player's handicap level
-2. Aligned with their primary goal (${userInput.goal})
-3. Within their budget range (${userInput.budget})
-
-Return only the JSON response, no additional text.`;
+    const searchPrompt = `You are a golf expert assistant. Using web search, find the top 3 most recommended golf iron sets in 2025 for a player with a handicap of ${userInput.handicap} whose primary goal is ${userInput.goal}. Return ONLY a valid JSON array of the model names. Example: ["TaylorMade Qi10", "Callaway Paradym Ai Smoke", "Titleist T200 2025"]`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: 'user', content: openaiPrompt }],
-      max_tokens: 500,
-      temperature: 0.7,
+      model: "gpt-4o", // Use a model that supports web search well
+      messages: [{ role: 'user', content: searchPrompt }],
+      response_format: { type: "json_object" }, // Ensure the output is parsable
     });
 
     const responseText = completion.choices[0].message.content;
@@ -149,11 +125,13 @@ Return only the JSON response, no additional text.`;
       throw new Error('No response from OpenAI');
     }
 
-    // Parse OpenAI response
-    let openaiRecommendation: OpenAIClubRecommendation;
+    // Parse OpenAI response - new format returns array directly
+    let modelNames: string[];
     try {
-      openaiRecommendation = JSON.parse(responseText);
-      console.log('OpenAI response:', openaiRecommendation);
+      const parsedResponse = JSON.parse(responseText);
+      // Handle both array format and object format for backward compatibility
+      modelNames = Array.isArray(parsedResponse) ? parsedResponse : parsedResponse.modelNames || [];
+      console.log('OpenAI web search response - model names:', modelNames);
     } catch {
       console.error('Failed to parse OpenAI response:', responseText);
       throw new Error('Invalid response format from OpenAI');
@@ -184,7 +162,7 @@ Return only the JSON response, no additional text.`;
     // C. Correctly identify missing clubs
     const missingClubNames: string[] = [];
     
-    for (const modelName of openaiRecommendation.modelNames) {
+    for (const modelName of modelNames) {
       const normalizedModelName = normalizeName(modelName);
       console.log(`Checking: "${modelName}" -> normalized: "${normalizedModelName}"`);
       
@@ -212,7 +190,7 @@ Return only the JSON response, no additional text.`;
     });
 
     console.log('DEBUG: Preparing to search for missing clubs.');
-    console.log('DEBUG: OpenAI Recommendations:', openaiRecommendation.modelNames);
+    console.log('DEBUG: OpenAI Recommendations:', modelNames);
     console.log('DEBUG: Clubs found in DB:', existingClubs.map(c => c.model));
     console.log('DEBUG: Clubs identified as MISSING:', missingClubNames);
 
@@ -249,7 +227,7 @@ Return only the JSON response, no additional text.`;
               const dataPrompt = `You are a golf equipment data expert. For the club named "${name}", provide a JSON object with the following keys: "category" (one of ["Game Improvement", "Player's Distance", "Player's Iron", "Blade"]), "handicapRangeMin" (number), "handicapRangeMax" (number), "keyStrengths" (an array of strings), and "pricePoint" (one of ["Budget", "Mid-range", "Premium"]). Return ONLY the valid JSON object.`;
               
               const completion = await openai.chat.completions.create({
-                model: "gpt-3.5-turbo",
+                model: "gpt-4o", // Use powerful model for expert analysis
                 messages: [{ role: 'user', content: dataPrompt }],
                 max_tokens: 200,
               });
