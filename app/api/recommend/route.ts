@@ -62,23 +62,40 @@ export async function POST(request: Request) {
     });
 
     const responseText = completion.choices[0].message.content;
+    console.log('=== OPENAI RESPONSE DEBUG ===');
+    console.log('Response text:', responseText);
+    console.log('Response type:', typeof responseText);
+    console.log('Response length:', responseText?.length);
+    console.log('=== END DEBUG ===');
+    
     if (!responseText) {
       throw new Error('No response from OpenAI');
     }
 
-    // Parse OpenAI response - new format returns array directly
+    // Parse OpenAI response - handle markdown code blocks
     let modelNames: string[];
     try {
       console.log('Raw OpenAI response:', responseText);
-      const parsedResponse = JSON.parse(responseText);
+      
+      // Extract JSON from markdown code blocks if present
+      let jsonText = responseText.trim();
+      if (jsonText.startsWith('```json')) {
+        jsonText = jsonText.replace(/^```json\n/, '').replace(/\n```$/, '');
+      } else if (jsonText.startsWith('```')) {
+        jsonText = jsonText.replace(/^```\n/, '').replace(/\n```$/, '');
+      }
+      
+      console.log('Extracted JSON text:', jsonText);
+      const parsedResponse = JSON.parse(jsonText);
       console.log('Parsed OpenAI response:', parsedResponse);
+      
       // Handle both array format and object format for backward compatibility
       modelNames = Array.isArray(parsedResponse) ? parsedResponse : parsedResponse.modelNames || [];
       console.log('OpenAI web search response - model names:', modelNames);
     } catch (parseError) {
       console.error('Failed to parse OpenAI response:', responseText);
       console.error('Parse error:', parseError);
-      throw new Error('Invalid response format from OpenAI');
+      throw new Error(`Invalid response format from OpenAI. Raw response: ${responseText}`);
     }
 
     // Step C: Normalize and Match Names
