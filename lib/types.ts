@@ -11,6 +11,7 @@ export interface Club {
   handicapRange: [number, number]; // [min, max]
   keyStrengths: ('Forgiveness' | 'Distance' | 'Feel' | 'Workability')[];
   pricePoint: 'Budget' | 'Mid-range' | 'Premium';
+  approximatePrice?: number; // Approximate retail price in USD
   imageUrl: string;
 }
 
@@ -26,6 +27,7 @@ export interface DbClub {
   handicapRangeMax: number;
   keyStrengths: ('Forgiveness' | 'Distance' | 'Feel' | 'Workability')[];
   pricePoint: 'Budget' | 'Mid-range' | 'Premium';
+  approximatePrice?: number; // Approximate retail price in USD
   imageUrl: string;
   createdAt: Date;
   updatedAt: Date;

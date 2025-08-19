@@ -14,6 +14,7 @@ export const manufacturs = pgTable('manufacturs', {
   handicapRangeMax: integer('handicap_range_max').notNull(),
   keyStrengths: varchar('key_strengths', { length: 50 }).array().notNull(), // ['Forgiveness', 'Distance', 'Feel', 'Workability']
   pricePoint: varchar('price_point', { length: 20 }).notNull(), // 'Budget' | 'Mid-range' | 'Premium'
+  approximatePrice: integer('approximate_price'), // Approximate retail price in USD
   imageUrl: varchar('image_url', { length: 500 }).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

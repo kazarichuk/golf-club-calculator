@@ -185,7 +185,7 @@ export async function POST(request: Request) {
             
             // Call 2: OpenAI for structured data
             (async () => {
-              const dataPrompt = `You are a golf equipment data expert. For the club named "${name}", provide a JSON object with the following keys: "category" (one of ["Game Improvement", "Player's Distance", "Player's Iron", "Blade"]), "handicapRangeMin" (number), "handicapRangeMax" (number), "keyStrengths" (an array of strings), and "pricePoint" (one of ["Budget", "Mid-range", "Premium"]). Return ONLY the valid JSON object.`;
+              const dataPrompt = `You are a golf equipment data expert. For the club named "${name}", provide a JSON object with the following keys: "category" (one of ["Game Improvement", "Player's Distance", "Player's Iron", "Blade"]), "handicapRangeMin" (number), "handicapRangeMax" (number), "keyStrengths" (an array of strings), "pricePoint" (one of ["Budget", "Mid-range", "Premium"]), and "approximatePriceUSD" (a number representing the approximate retail price in USD). Return ONLY the valid JSON object.`;
               
               const completion = await openai.chat.completions.create({
                 model: "gpt-4o", // Use powerful model for expert analysis
@@ -242,6 +242,7 @@ export async function POST(request: Request) {
               handicapRangeMax: jsonData.handicapRangeMax,
               keyStrengths: jsonData.keyStrengths || ['Distance', 'Forgiveness'],
               pricePoint: jsonData.pricePoint || 'Mid-range',
+              approximatePrice: jsonData.approximatePriceUSD || null,
               imageUrl: imageUrl,
             }).returning();
             

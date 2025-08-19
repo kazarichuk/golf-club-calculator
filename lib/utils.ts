@@ -18,6 +18,7 @@ export function dbClubToClub(dbClub: {
   handicapRangeMax: number;
   keyStrengths: string[];
   pricePoint: string;
+  approximatePrice?: number | null;
   imageUrl: string;
   createdAt: Date;
   updatedAt: Date;
@@ -30,6 +31,7 @@ export function dbClubToClub(dbClub: {
     handicapRange: [dbClub.handicapRangeMin, dbClub.handicapRangeMax],
     keyStrengths: dbClub.keyStrengths as ('Forgiveness' | 'Distance' | 'Feel' | 'Workability')[],
     pricePoint: dbClub.pricePoint as 'Budget' | 'Mid-range' | 'Premium',
+    approximatePrice: dbClub.approximatePrice || undefined,
     imageUrl: dbClub.imageUrl,
   };
 }
@@ -46,6 +48,7 @@ export function clubToDbClub(club: Club): Omit<DbClub, 'id' | 'createdAt' | 'upd
     handicapRangeMax: club.handicapRange[1],
     keyStrengths: club.keyStrengths,
     pricePoint: club.pricePoint,
+    approximatePrice: club.approximatePrice,
     imageUrl: club.imageUrl,
   };
 }
