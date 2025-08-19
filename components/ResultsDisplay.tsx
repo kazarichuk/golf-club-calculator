@@ -73,15 +73,16 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                 {/* Golf Club Image */}
                 {club.imageUrl && (
                   <div className="mt-4 flex justify-center">
-                    <div className="relative w-full h-48 bg-muted rounded-lg overflow-hidden">
+                    <div className="w-full h-48 bg-muted rounded-lg overflow-hidden flex items-center justify-center">
                       <Image
                         src={club.imageUrl}
                         alt={`${club.brand} ${club.model}`}
-                        fill
-                        className="object-cover"
+                        width={200}
+                        height={150}
+                        className="object-contain max-w-full max-h-full"
                         onError={(e) => {
                           // Fallback to a simple golf club icon if image fails to load
-                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgNzBDMTQwIDcwIDkwIDEyMCA5MCAxODBDOTAgMjQwIDE0MCAyOTAgMjAwIDI5MEMyNjAgMjkwIDMxMCAyNDAgMzEwIDE4MEMzMTAgMTIwIDI2MCA3MCAyMDAgNzBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8cGF0aCBkPSJNMTgwIDE0MEgyMjBWMjAwSDE4MFYxNDBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8dGV4dCB4PSIyMDAiIHk9IjI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjc3Mzc1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Hb2xmIENsdWI8L3RleHQ+Cjwvc3ZnPgo=';
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8cGF0aCBkPSJNMTgwIDE0MEgyMjBWMjAwSDE4MFYxNDBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8dGV4dCB4PSIyMDAiIHk9IjI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjc3Mzc1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Hb2xmIENsdWI8L3RleHQ+Cjwvc3ZnPgo=';
                         }}
                       />
                     </div>
