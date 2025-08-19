@@ -6,6 +6,9 @@ import { dbClubToClub } from '@/lib/utils';
 import OpenAI from 'openai';
 import { eq, and, inArray } from 'drizzle-orm';
 
+// Import SerpApi with type assertion
+const { getJson } = require('google-search-results-nodejs');
+
 export async function POST(request: Request) {
   try {
     // Check for required environment variables
@@ -21,6 +24,14 @@ export async function POST(request: Request) {
       console.error('Missing DATABASE_URL environment variable');
       return NextResponse.json(
         { message: 'Database connection not configured. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
+    if (!process.env.SERPAPI_API_KEY) {
+      console.error('Missing SERPAPI_API_KEY environment variable');
+      return NextResponse.json(
+        { message: 'SerpApi key not configured. Please contact support.' },
         { status: 500 }
       );
     }
@@ -151,7 +162,8 @@ Return only the JSON response, no additional text.`;
     // Step C: Match Names and Populate Cache
     console.log('Matching club names with database records');
     
-    const foundClubs: typeof schema.manufacturs.$inferSelect[] = [];
+    // Search for each recommended club by model name
+    const existingClubs: typeof schema.manufacturs.$inferSelect[] = [];
     const foundIds: number[] = [];
 
     // Search for each recommended club by model name
@@ -184,13 +196,105 @@ Return only the JSON response, no additional text.`;
       console.log('Matching club found:', matchingClub ? matchingClub.model : 'None');
       
       if (matchingClub) {
-        foundClubs.push(matchingClub);
+        existingClubs.push(matchingClub);
         foundIds.push(matchingClub.id);
       }
     }
 
+    // New Logic: Compare original modelNames with existingClubs to find missing clubs
+    const missingClubNames = openaiRecommendation.modelNames.filter(modelName => {
+      // Check if this model name was found in the database
+      return !existingClubs.some(club => {
+        const clubModel = club.model.toLowerCase();
+        const searchModel = modelName.toLowerCase();
+        
+        // Exact match
+        if (clubModel === searchModel) return true;
+        
+        // Contains match
+        if (clubModel.includes(searchModel) || searchModel.includes(clubModel)) return true;
+        
+        // Brand + model match
+        const clubWords = clubModel.split(' ');
+        const searchWords = searchModel.split(' ');
+        
+        const hasAllSearchWords = searchWords.every(word => 
+          clubWords.some(clubWord => clubWord.includes(word) || word.includes(clubWord))
+        );
+        
+        return hasAllSearchWords;
+      });
+    });
+
+    // Verification log to show found vs missing clubs
+    console.log({
+      found: existingClubs.map(c => c.model),
+      missing: missingClubNames,
+    });
+
+    // Step D: Handle Missing Clubs with SerpApi
+    const newlyCreatedClubs: typeof schema.manufacturs.$inferSelect[] = [];
+    
+    if (missingClubNames.length > 0) {
+      console.log(`Processing ${missingClubNames.length} missing clubs with SerpApi...`);
+      
+      for (const name of missingClubNames) {
+        try {
+          console.log(`Searching for image: "${name}" golf club iron`);
+          
+          // Search for image using SerpApi
+          const searchResults = await getJson({
+            q: `${name} golf club iron`,
+            api_key: process.env.SERPAPI_API_KEY,
+            engine: 'google_images',
+            num: 1
+          });
+          
+          // Validate search results
+          if (!searchResults || !searchResults.images_results) {
+            console.log(`WARNING: Invalid search results for "${name}"`);
+            continue;
+          }
+          
+          // Safely extract the URL of the first image
+          const imageUrl = searchResults.images_results?.[0]?.original;
+          
+          if (imageUrl) {
+            // Extract brand from name (first word) - handle edge cases
+            const nameParts = name.split(' ');
+            const brand = nameParts.length > 1 ? nameParts[0] : 'Unknown';
+            
+            // Insert new club into database
+            const [newClub] = await db.insert(schema.manufacturs).values({
+              brand: brand,
+              model: name,
+              category: 'Game Improvement', // Default category
+              handicapRangeMin: 0, // Default values
+              handicapRangeMax: 25,
+              keyStrengths: ['Distance', 'Forgiveness'], // Default strengths
+              pricePoint: 'Mid-range', // Default price point
+              imageUrl: imageUrl,
+            }).returning();
+            
+            // Add to newly created clubs array
+            newlyCreatedClubs.push(newClub);
+            foundIds.push(newClub.id);
+            
+            console.log(`SUCCESS: Found image for "${name}" and created new DB entry.`);
+          } else {
+            console.log(`WARNING: No image found for "${name}"`);
+          }
+        } catch (error) {
+          console.error(`ERROR: Failed to process "${name}":`, error);
+        }
+      }
+    }
+
+    // Combine existing and newly created clubs
+    const finalResults = [...existingClubs, ...newlyCreatedClubs];
+
     // If we found clubs, save to cache
-    if (foundClubs.length > 0) {
+    if (finalResults.length > 0) {
       await db.insert(schema.recommendationCache).values({
         handicap: userInput.handicap,
         goal: userInput.goal,
@@ -198,12 +302,12 @@ Return only the JSON response, no additional text.`;
         recommendedIds: foundIds,
       });
       
-      console.log(`Cached ${foundClubs.length} recommendations`);
+      console.log(`Cached ${finalResults.length} recommendations`);
     }
 
     // Create enriched results
     const enrichedResults: RecommendationResult[] = await Promise.all(
-      foundClubs.map(async (dbClub, index) => {
+      finalResults.map(async (dbClub: typeof schema.manufacturs.$inferSelect, index: number) => {
         const club = dbClubToClub(dbClub);
         
         // Determine badge based on rank
