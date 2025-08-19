@@ -14,9 +14,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'www.usga.org',
-        port: '',
-        pathname: '/equipment/images/conf_clubs/**',
+        hostname: '**', // This now allows any hostname
+      },
+      {
+        protocol: 'http', // Also allow http for more flexibility
+        hostname: '**',
       },
     ],
   },
