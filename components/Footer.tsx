@@ -7,7 +7,7 @@ export function Footer() {
   return (
     <footer className="w-full border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col items-center justify-center gap-4 md:flex-row md:justify-between">
           {/* Logo */}
           <div className="flex items-center">
             <Image
@@ -20,8 +20,8 @@ export function Footer() {
           </div>
 
           {/* Contact Information */}
-          <div className="text-white text-sm">
-            <span className="text-muted-foreground">
+          <div className="text-center md:text-right">
+            <span className="text-muted-foreground text-sm">
               mattia@procaddie.ai • ©2025 ProCaddie Limited
             </span>
           </div>

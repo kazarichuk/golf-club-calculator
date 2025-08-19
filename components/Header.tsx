@@ -16,13 +16,13 @@ export function Header() {
               alt="Procaddie Logo"
               width={120}
               height={40}
-              className="h-8 w-auto"
+              className="h-6 w-auto sm:h-8"
             />
           </div>
 
           {/* Join Now Button */}
           <Button 
-            className="bg-[#39934D] hover:bg-[#2d7a3d] text-white"
+            className="bg-[#39934D] hover:bg-[#2d7a3d] text-white text-xs sm:text-sm"
             size="sm"
             asChild
           >
