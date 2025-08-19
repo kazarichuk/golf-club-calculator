@@ -62,6 +62,15 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                   <div>
                     <CardTitle className="text-lg">{club.model}</CardTitle>
                     <CardDescription className="text-sm">{club.brand}</CardDescription>
+                    {club.approximatePrice && club.approximatePrice > 0 && (
+                      <div className="text-2xl font-bold text-primary pt-2">
+                        {new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: 'USD',
+                          minimumFractionDigits: 0,
+                        }).format(club.approximatePrice)}
+                      </div>
+                    )}
                   </div>
                   {club.rank && (
                     <Badge variant="outline" className="text-xs">
