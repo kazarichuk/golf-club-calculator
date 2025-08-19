@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       // Get the cached club IDs
       const cachedIds = cachedResult[0].recommendedIds;
       
-      // Query the manufacturs table to get full club data
+      // Query the manufacturs table to get full club data including imageUrl
       const cachedClubs = await db
         .select()
         .from(schema.manufacturs)
@@ -95,15 +95,16 @@ export async function POST(request: Request) {
     // Step B: Query OpenAI (Cache Miss)
     console.log('Cache miss - querying OpenAI');
     
+    // First, get all available clubs from the database to provide to OpenAI
+    const allClubs = await db.select().from(schema.manufacturs);
+    
+    // Create a list of available clubs for OpenAI
+    const availableClubsList = allClubs.map(club => `${club.brand} ${club.model}`).join('\n- ');
+    
     const openaiPrompt = `You are a world-class golf club fitting expert. Based on the following criteria, recommend 3-5 specific golf club models from this exact list:
 
 AVAILABLE CLUBS:
-- Titleist T200 (2023)
-- Callaway Rogue ST Max
-- Mizuno JPX 923 Forged
-- TaylorMade P790 (2023)
-- Ping G430
-- Wilson Staff Model Blade
+- ${availableClubsList}
 
 Player Profile:
 - Handicap: ${userInput.handicap}
@@ -157,11 +158,7 @@ Return only the JSON response, no additional text.`;
     for (const modelName of openaiRecommendation.modelNames) {
       console.log('Searching for club:', modelName);
       
-      // Get all clubs and filter manually
-      const allClubs = await db.select().from(schema.manufacturs);
-      console.log('Searching for club:', modelName);
-      
-      // Find matching club manually with more flexible matching
+      // Find matching club with flexible matching
       const matchingClub = allClubs.find(club => {
         const clubModel = club.model.toLowerCase();
         const searchModel = modelName.toLowerCase();

@@ -3,7 +3,7 @@ import { pgTable, serial, varchar, integer, timestamp } from 'drizzle-orm/pg-cor
 
 /**
  * Table for storing golf club manufacturers and their products
- * This replaces the static clubsData array with a database table
+ * This is the single source of truth for all golf club data
  */
 export const manufacturs = pgTable('manufacturs', {
   id: serial('id').primaryKey(),
