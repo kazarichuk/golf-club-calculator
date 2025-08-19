@@ -159,72 +159,51 @@ Return only the JSON response, no additional text.`;
       throw new Error('Invalid response format from OpenAI');
     }
 
-    // Step C: Match Names and Populate Cache
-    console.log('Matching club names with database records');
+    // Step C: Normalize and Match Names
+    console.log('Normalizing and matching club names with database records');
     
-    // Search for each recommended club by model name
+    // A. Normalization function
+    const normalizeName = (name: string): string => {
+      return name
+        .toLowerCase()
+        .replace(/[^\w\s]/g, '') // Remove special characters
+        .replace(/\s+/g, ' ') // Normalize whitespace
+        .trim();
+    };
+    
     const existingClubs: typeof schema.manufacturs.$inferSelect[] = [];
     const foundIds: number[] = [];
 
-    // Search for each recommended club by model name
+    // B. Create a Set of normalized existing club names for fast lookups
+    const normalizedExistingNames = new Set(
+      allClubs.map(club => normalizeName(club.model))
+    );
+    
+    console.log('Normalized existing club names:', Array.from(normalizedExistingNames));
+
+    // C. Correctly identify missing clubs
+    const missingClubNames: string[] = [];
+    
     for (const modelName of openaiRecommendation.modelNames) {
-      console.log('Searching for club:', modelName);
+      const normalizedModelName = normalizeName(modelName);
+      console.log(`Checking: "${modelName}" -> normalized: "${normalizedModelName}"`);
       
-      // Find matching club with flexible matching
-      const matchingClub = allClubs.find(club => {
-        const clubModel = club.model.toLowerCase();
-        const searchModel = modelName.toLowerCase();
-        
-        // Exact match
-        if (clubModel === searchModel) return true;
-        
-        // Contains match
-        if (clubModel.includes(searchModel) || searchModel.includes(clubModel)) return true;
-        
-        // Brand + model match (e.g., "Callaway Rogue ST Max" matches "Rogue ST Max")
-        const clubWords = clubModel.split(' ');
-        const searchWords = searchModel.split(' ');
-        
-        // Check if search words are contained in club model
-        const hasAllSearchWords = searchWords.every(word => 
-          clubWords.some(clubWord => clubWord.includes(word) || word.includes(clubWord))
+      if (normalizedExistingNames.has(normalizedModelName)) {
+        // Found in database - add to existing clubs
+        const matchingClub = allClubs.find(club => 
+          normalizeName(club.model) === normalizedModelName
         );
-        
-        return hasAllSearchWords;
-      });
-      
-      console.log('Matching club found:', matchingClub ? matchingClub.model : 'None');
-      
-      if (matchingClub) {
-        existingClubs.push(matchingClub);
-        foundIds.push(matchingClub.id);
+        if (matchingClub) {
+          existingClubs.push(matchingClub);
+          foundIds.push(matchingClub.id);
+          console.log(`✓ Found in DB: ${matchingClub.model}`);
+        }
+      } else {
+        // Not found in database - add to missing clubs
+        missingClubNames.push(modelName); // Keep original name for SerpApi search
+        console.log(`✗ Missing from DB: ${modelName}`);
       }
     }
-
-    // New Logic: Compare original modelNames with existingClubs to find missing clubs
-    const missingClubNames = openaiRecommendation.modelNames.filter(modelName => {
-      // Check if this model name was found in the database
-      return !existingClubs.some(club => {
-        const clubModel = club.model.toLowerCase();
-        const searchModel = modelName.toLowerCase();
-        
-        // Exact match
-        if (clubModel === searchModel) return true;
-        
-        // Contains match
-        if (clubModel.includes(searchModel) || searchModel.includes(clubModel)) return true;
-        
-        // Brand + model match
-        const clubWords = clubModel.split(' ');
-        const searchWords = searchModel.split(' ');
-        
-        const hasAllSearchWords = searchWords.every(word => 
-          clubWords.some(clubWord => clubWord.includes(word) || word.includes(clubWord))
-        );
-        
-        return hasAllSearchWords;
-      });
-    });
 
     // Verification log to show found vs missing clubs
     console.log({
@@ -247,12 +226,20 @@ Return only the JSON response, no additional text.`;
         try {
           console.log(`Searching for image: "${name}" golf club iron`);
           
-          // Search for image using SerpApi
+          // Search for image using SerpApi with callback approach
           const search = new GoogleSearch(process.env.SERPAPI_API_KEY);
-          const searchResults = await search.json({
-            q: `${name} golf club iron`,
-            engine: 'google_images',
-            num: 1
+          const searchResults = await new Promise<any>((resolve, reject) => {
+            search.json({
+              q: `${name} golf club iron`,
+              engine: 'google_images',
+              num: 1
+            }, (data: any) => {
+              if (data.error) {
+                reject(new Error(data.error));
+              } else {
+                resolve(data);
+              }
+            });
           });
           
           // Validate search results
