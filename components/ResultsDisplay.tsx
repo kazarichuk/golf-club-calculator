@@ -89,32 +89,34 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                 )}
               </CardHeader>
               
-              <CardContent className="space-y-3 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">Category:</span>
-                  <Badge variant="secondary" className="text-xs">
-                    {club.category}
-                  </Badge>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-medium mb-1">Key strengths:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {club.keyStrengths.map((strength) => (
-                      <Badge key={strength} variant="outline" className="text-xs">
-                        {strength}
-                      </Badge>
-                    ))}
+              <CardContent className="flex-1 overflow-hidden">
+                <div className="h-full overflow-y-auto space-y-3 pr-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Category:</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {club.category}
+                    </Badge>
                   </div>
-                </div>
-                
-                {club.explanation && (
-                  <div className="mt-3 p-3 bg-muted/50 rounded-lg">
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {club.explanation}
-                    </p>
+                  
+                  <div>
+                    <p className="text-sm font-medium mb-1">Key strengths:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {club.keyStrengths.map((strength) => (
+                        <Badge key={strength} variant="outline" className="text-xs">
+                          {strength}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                )}
+                  
+                  {club.explanation && (
+                    <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {club.explanation}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </CardContent>
               
               {/* Match Score positioned at bottom with 12px margin */}
