@@ -48,7 +48,7 @@ jest.mock('openai', () => {
 
 // Import after mocks are set up
 import { NextRequest } from 'next/server';
-import { POST } from './route';
+import { POST } from '../app/api/recommend/route';
 import { UserInput } from '@/lib/types';
 
 describe('/api/recommend Integration Tests', () => {
