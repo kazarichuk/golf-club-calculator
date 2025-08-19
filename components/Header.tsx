@@ -24,8 +24,11 @@ export function Header() {
           <Button 
             className="bg-[#39934D] hover:bg-[#2d7a3d] text-white"
             size="sm"
+            asChild
           >
-            Join Now
+            <a href="https://procaddie.ai/" target="_blank" rel="noopener noreferrer">
+              Join Now
+            </a>
           </Button>
         </div>
       </div>
