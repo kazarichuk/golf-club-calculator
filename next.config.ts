@@ -10,6 +10,16 @@ const nextConfig: NextConfig = {
   experimental: {
     typedRoutes: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'www.usga.org',
+        port: '',
+        pathname: '/equipment/images/conf_clubs/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;
