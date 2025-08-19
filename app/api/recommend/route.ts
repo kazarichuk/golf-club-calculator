@@ -206,10 +206,21 @@ export async function POST(request: Request) {
           
           const imageUrl = searchResults.images_results?.[0]?.original;
           
-          // Validate OpenAI results and parse JSON
+          // Validate OpenAI results and parse JSON - handle markdown code blocks
           let jsonData;
           try {
-            jsonData = JSON.parse(openaiData || '{}');
+            console.log(`Raw OpenAI structured data for "${name}":`, openaiData);
+            
+            // Extract JSON from markdown code blocks if present
+            let jsonText = openaiData?.trim() || '{}';
+            if (jsonText.startsWith('```json')) {
+              jsonText = jsonText.replace(/^```json\n/, '').replace(/\n```$/, '');
+            } else if (jsonText.startsWith('```')) {
+              jsonText = jsonText.replace(/^```\n/, '').replace(/\n```$/, '');
+            }
+            
+            console.log(`Extracted JSON text for "${name}":`, jsonText);
+            jsonData = JSON.parse(jsonText);
             console.log(`OpenAI structured data for "${name}":`, jsonData);
           } catch (parseError) {
             console.log(`WARNING: Invalid JSON response from OpenAI for "${name}":`, openaiData);
