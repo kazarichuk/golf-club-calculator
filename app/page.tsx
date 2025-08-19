@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { CalculatorForm } from "@/components/CalculatorForm";
 import { ResultsDisplay } from "@/components/ResultsDisplay";
+import { Header } from "@/components/Header";
 import { RecommendationResult, UserInput } from "@/lib/types";
 
 export default function Home() {
@@ -38,14 +39,17 @@ export default function Home() {
   };
 
   return (
-    <main className="container mx-auto px-4 py-12">
-      <CalculatorForm onSubmit={handleGetRecommendations} isLoading={isLoading} />
-      {error && (
-        <div className="text-red-500 text-center mt-4">
-          {error}
-        </div>
-      )}
-      <ResultsDisplay results={results} />
-    </main>
+    <>
+      <Header />
+      <main className="container mx-auto px-4 py-12">
+        <CalculatorForm onSubmit={handleGetRecommendations} isLoading={isLoading} />
+        {error && (
+          <div className="text-red-500 text-center mt-4">
+            {error}
+          </div>
+        )}
+        <ResultsDisplay results={results} />
+      </main>
+    </>
   );
 }
