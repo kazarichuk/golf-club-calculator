@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CalculatorForm } from "@/components/CalculatorForm";
 import { ResultsDisplay } from "@/components/ResultsDisplay";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { RecommendationResult, UserInput } from "@/lib/types";
 
 export default function Home() {
@@ -50,6 +51,7 @@ export default function Home() {
         )}
         <ResultsDisplay results={results} />
       </main>
+      <Footer />
     </>
   );
 }
