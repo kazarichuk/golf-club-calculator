@@ -47,7 +47,7 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
           </p>
         ) : (
           results.map((club, index) => (
-            <Card key={club.id} className={`relative ${index === 0 ? 'ring-2 ring-primary' : ''}`}>
+            <Card key={club.id} className={`relative flex flex-col h-full ${index === 0 ? 'ring-2 ring-primary' : ''}`}>
               {club.badge && (
                 <div className="absolute -top-2 -right-2 z-10">
                   <Badge variant={getBadgeVariant(club.badge)} className="flex items-center gap-1">
@@ -81,7 +81,7 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                         className="object-cover"
                         onError={(e) => {
                           // Fallback to a simple golf club icon if image fails to load
-                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgNzBDMTQwIDcwIDkwIDEyMCA5MCAxODBDOTAgMjQwIDE0MCAyOTAgMjAwIDI5MEMyNjAgMjkwIDMxMCAyNDAgMzEwIDE4MEMzMTAgMTIwIDI2MCA3MCAyMDAgNzBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8cGF0aCBkPSJNMTgwIDE0MEgyMjBWMjAwSDE4MFYxNDBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8dGV4dCB4PSIyMDAiIHk9IjI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjc3Mzc1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Hb2xmIENsdWI8L3RleHQ+Cjwvc3ZnPgo=';
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgNzBDMTQwIDcwIDkwIDEyMCA5MCAxODBDOTAgMjQwIDE0MCAyOTAgMjAwIDI5MEMyNjAgMjkwIDMxMCAyNDAgMzEwIDE4MEMzMTAgMTIwIDI2MCA3MCAyMDAgNzBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8cGF0aCBkPSJNMTgwIDE0MEgyMjBWMjAwSDE4MFYxNDBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8dGV4dCB4PSIyMDAiIHk9IjI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjc3Mzc1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Hb2xmIENsdWI8L3RleHQ+Cjwvc3ZnPgo=';
                         }}
                       />
                     </div>
@@ -89,7 +89,7 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                 )}
               </CardHeader>
               
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">Category:</span>
                   <Badge variant="secondary" className="text-xs">
@@ -117,12 +117,12 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                 )}
               </CardContent>
               
-              {/* Removed buttons - keeping footer for spacing */}
-              <CardFooter className="pt-0">
+              {/* Match Score positioned at bottom with 12px margin */}
+              <div className="px-6 pb-3 mt-auto">
                 <div className="w-full text-center text-xs text-muted-foreground">
                   Match Score: {club.matchScore}%
                 </div>
-              </CardFooter>
+              </div>
             </Card>
           ))
         )}
