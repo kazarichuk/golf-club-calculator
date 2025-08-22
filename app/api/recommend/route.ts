@@ -53,7 +53,25 @@ export async function POST(request: Request) {
     // Create a list of available clubs for OpenAI
     const availableClubsList = allClubs.map(club => `${club.brand} ${club.model}`).join('\n- ');
     
-    const searchPrompt = `You are a golf expert assistant. Find the top 3 most recommended golf iron sets in 2025 for a player with a handicap of ${userInput.handicap} whose primary goal is ${userInput.goal}. Return ONLY a valid JSON array of the model names. Example: ["TaylorMade Qi10", "Callaway Paradym Ai Smoke", "Titleist T200 2025"]`;
+    // Build a comprehensive prompt that handles all user parameters
+    let searchPrompt = `You are a golf expert assistant. Find the top 3 most recommended golf iron sets for a player with the following characteristics:
+- Handicap: ${userInput.handicap}
+- Primary goal: ${userInput.goal}
+- Budget: ${userInput.budget}`;
+    
+    if (userInput.preferredBrand && userInput.preferredBrand.trim()) {
+      searchPrompt += `\n- Preferred brand: ${userInput.preferredBrand}`;
+    }
+    
+    if (userInput.age) {
+      searchPrompt += `\n- Age: ${userInput.age} years old`;
+    }
+    
+    if (userInput.clubSpeed) {
+      searchPrompt += `\n- Club head speed: ${userInput.clubSpeed} mph`;
+    }
+    
+    searchPrompt += `\n\nFocus on models available in 2023 or earlier to ensure accuracy. Consider the budget constraint: Budget clubs should be under $500, Mid-range clubs should be $500-$1000, and Premium clubs can be over $1000. For age and club speed, consider that older players or those with slower swing speeds typically benefit from more forgiving clubs with lighter shafts. Return ONLY a valid JSON array of the model names. Example: ["TaylorMade Stealth", "Callaway Apex", "Titleist T200"]`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // Use a model that supports web search well
@@ -95,7 +113,53 @@ export async function POST(request: Request) {
     } catch (parseError) {
       console.error('Failed to parse OpenAI response:', responseText);
       console.error('Parse error:', parseError);
-      throw new Error(`Invalid response format from OpenAI. Raw response: ${responseText}`);
+      
+      // Check if OpenAI returned an error message about knowledge cutoff
+      if (responseText.includes("cannot provide information about products released after") || 
+          responseText.includes("my last update") ||
+          responseText.includes("knowledge cutoff")) {
+        
+        console.log('OpenAI returned knowledge cutoff error, using fallback recommendations');
+        
+        // Provide fallback recommendations based on available clubs in database
+        const fallbackRecommendations = allClubs
+          .filter(club => {
+            // Filter by handicap range
+            const handicap = userInput.handicap;
+            const isGoodForHandicap = (handicap <= 10 && club.category === 'Player\'s Distance') ||
+                                    (handicap > 10 && handicap <= 20 && club.category === 'Game Improvement') ||
+                                    (handicap > 20 && club.category === 'Super Game Improvement');
+            
+            // Filter by brand preference if specified
+            const matchesBrand = !userInput.preferredBrand || 
+                               !userInput.preferredBrand.trim() || 
+                               club.brand.toLowerCase().includes(userInput.preferredBrand.toLowerCase());
+            
+            // Filter by budget
+            const matchesBudget = club.pricePoint === userInput.budget;
+            
+            // Filter by age
+            const matchesAge = !userInput.age || 
+                             (userInput.age >= 50 && (club.category === 'Game Improvement' || club.category === 'Super Game Improvement')) ||
+                             (userInput.age >= 40 && userInput.age < 50 && (club.category === 'Game Improvement' || club.category === "Player's Distance")) ||
+                             (userInput.age < 40);
+            
+            // Filter by club speed
+            const matchesSpeed = !userInput.clubSpeed || 
+                               (userInput.clubSpeed < 80 && (club.category === 'Game Improvement' || club.category === 'Super Game Improvement')) ||
+                               (userInput.clubSpeed >= 80 && userInput.clubSpeed < 95 && (club.category === 'Game Improvement' || club.category === "Player's Distance")) ||
+                               (userInput.clubSpeed >= 95);
+            
+            return isGoodForHandicap && matchesBrand && matchesBudget && matchesAge && matchesSpeed;
+          })
+          .slice(0, 3)
+          .map(club => `${club.brand} ${club.model}`);
+        
+        modelNames = fallbackRecommendations;
+        console.log('Using fallback recommendations:', modelNames);
+      } else {
+        throw new Error(`Invalid response format from OpenAI. Raw response: ${responseText}`);
+      }
     }
 
     // Step C: Normalize and Match Names
@@ -108,6 +172,55 @@ export async function POST(request: Request) {
         .replace(/[^\w\s]/g, '') // Remove special characters
         .replace(/\s+/g, ' ') // Normalize whitespace
         .trim();
+    };
+    
+    // B. Budget filtering function
+    const matchesBudget = (club: typeof schema.manufacturs.$inferSelect): boolean => {
+      return club.pricePoint === userInput.budget;
+    };
+    
+    // C. Brand preference filtering function
+    const matchesBrand = (club: typeof schema.manufacturs.$inferSelect): boolean => {
+      if (!userInput.preferredBrand || !userInput.preferredBrand.trim()) {
+        return true; // No brand preference specified, so all brands match
+      }
+      return club.brand.toLowerCase().includes(userInput.preferredBrand.toLowerCase());
+    };
+    
+    // D. Age-based filtering function
+    const matchesAge = (club: typeof schema.manufacturs.$inferSelect): boolean => {
+      if (!userInput.age) {
+        return true; // No age specified, so all clubs match
+      }
+      
+      // Age-based logic: older players typically need more forgiving clubs
+      if (userInput.age >= 50) {
+        // Seniors typically benefit from Game Improvement or Super Game Improvement clubs
+        return club.category === 'Game Improvement' || club.category === 'Super Game Improvement';
+      } else if (userInput.age >= 40) {
+        // Middle-aged players can use Game Improvement or Player's Distance
+        return club.category === 'Game Improvement' || club.category === "Player's Distance";
+      }
+      // Younger players can use any category
+      return true;
+    };
+    
+    // E. Club speed filtering function
+    const matchesClubSpeed = (club: typeof schema.manufacturs.$inferSelect): boolean => {
+      if (!userInput.clubSpeed) {
+        return true; // No club speed specified, so all clubs match
+      }
+      
+      // Club speed-based logic: slower swings need more forgiving clubs
+      if (userInput.clubSpeed < 80) {
+        // Slow swing speeds benefit from Game Improvement clubs
+        return club.category === 'Game Improvement' || club.category === 'Super Game Improvement';
+      } else if (userInput.clubSpeed < 95) {
+        // Medium swing speeds can use Game Improvement or Player's Distance
+        return club.category === 'Game Improvement' || club.category === "Player's Distance";
+      }
+      // Fast swing speeds can use any category
+      return true;
     };
     
     const existingClubs: typeof schema.manufacturs.$inferSelect[] = [];
@@ -128,14 +241,30 @@ export async function POST(request: Request) {
       console.log(`Checking: "${modelName}" -> normalized: "${normalizedModelName}"`);
       
       if (normalizedExistingNames.has(normalizedModelName)) {
-        // Found in database - add to existing clubs
+        // Found in database - check if it matches budget
         const matchingClub = allClubs.find(club => 
           normalizeName(club.model) === normalizedModelName
         );
         if (matchingClub) {
-          existingClubs.push(matchingClub);
-          foundIds.push(matchingClub.id);
-          console.log(`✓ Found in DB: ${matchingClub.model}`);
+          const budgetMatch = matchesBudget(matchingClub);
+          const brandMatch = matchesBrand(matchingClub);
+          const ageMatch = matchesAge(matchingClub);
+          const speedMatch = matchesClubSpeed(matchingClub);
+          
+          if (budgetMatch && brandMatch && ageMatch && speedMatch) {
+            existingClubs.push(matchingClub);
+            foundIds.push(matchingClub.id);
+            console.log(`✓ Found in DB (all criteria match): ${matchingClub.model} (${matchingClub.pricePoint}, ${matchingClub.brand}, ${matchingClub.category})`);
+          } else {
+            const mismatches = [];
+            if (!budgetMatch) mismatches.push(`budget: ${matchingClub.pricePoint} vs ${userInput.budget}`);
+            if (!brandMatch) mismatches.push(`brand: ${matchingClub.brand} vs ${userInput.preferredBrand}`);
+            if (!ageMatch) mismatches.push(`age: ${userInput.age} vs category ${matchingClub.category}`);
+            if (!speedMatch) mismatches.push(`speed: ${userInput.clubSpeed} vs category ${matchingClub.category}`);
+            
+            console.log(`✗ Found in DB but criteria mismatch: ${matchingClub.model} (${mismatches.join(', ')})`);
+            missingClubNames.push(modelName); // Add to missing to find better alternatives
+          }
         }
       } else {
         // Not found in database - add to missing clubs
@@ -167,13 +296,16 @@ export async function POST(request: Request) {
           
           // Step 1: Perform Two Parallel API Calls
           const [searchResults, openaiData] = await Promise.all([
-            // Call 1: SerpApi for image
+            // Call 1: SerpApi for image with better search strategy
             new Promise<any>((resolve, reject) => {
               const search = new GoogleSearch(process.env.SERPAPI_API_KEY);
               search.json({
-                q: `${name} golf club iron`,
+                q: `${name} golf club iron ${userInput.budget} price ${userInput.preferredBrand ? userInput.preferredBrand + ' ' : ''}${userInput.age ? userInput.age + ' age ' : ''}${userInput.clubSpeed ? userInput.clubSpeed + ' mph ' : ''}official product image`,
                 engine: 'google_images',
-                num: 1
+                num: 5, // Get more results to find better sources
+                safe: 'active',
+                img_type: 'photo',
+                img_size: 'large'
               }, (data: any) => {
                 if (data.error) {
                   reject(new Error(data.error));
@@ -185,7 +317,11 @@ export async function POST(request: Request) {
             
             // Call 2: OpenAI for structured data
             (async () => {
-              const dataPrompt = `You are a golf equipment data expert. For the club named "${name}", provide a JSON object with the following keys: "category" (one of ["Game Improvement", "Player's Distance", "Player's Iron", "Blade"]), "handicapRangeMin" (number), "handicapRangeMax" (number), "keyStrengths" (an array of strings), "pricePoint" (one of ["Budget", "Mid-range", "Premium"]), and "approximatePriceUSD" (a number representing the approximate retail price in USD). Return ONLY the valid JSON object.`;
+              const dataPrompt = `You are a golf equipment data expert. For the club named "${name}", provide a JSON object with the following keys: "category" (one of ["Game Improvement", "Player's Distance", "Player's Iron", "Blade"]), "handicapRangeMin" (number), "handicapRangeMax" (number), "keyStrengths" (an array of strings), "pricePoint" (one of ["Budget", "Mid-range", "Premium"]), and "approximatePriceUSD" (a number representing the approximate retail price in USD). 
+
+User context: Budget is ${userInput.budget}${userInput.preferredBrand ? `, preferred brand is ${userInput.preferredBrand}` : ''}${userInput.age ? `, age is ${userInput.age} years old` : ''}${userInput.clubSpeed ? `, club head speed is ${userInput.clubSpeed} mph` : ''}.
+
+For pricePoint, consider that Budget should be under $500, Mid-range should be $500-$1000, and Premium should be over $1000. For category, consider that older players (50+) and slower swing speeds (<80 mph) typically benefit from Game Improvement clubs, while younger players with faster swings can use Player's Distance or Player's Iron clubs. Return ONLY the valid JSON object.`;
               
               const completion = await openai.chat.completions.create({
                 model: "gpt-4o", // Use powerful model for expert analysis
@@ -204,7 +340,37 @@ export async function POST(request: Request) {
             continue;
           }
           
-          const imageUrl = searchResults.images_results?.[0]?.original;
+          // Smart image URL selection - prefer reliable sources
+          let imageUrl = null;
+          if (searchResults.images_results && searchResults.images_results.length > 0) {
+            // Prefer images from reliable sources that don't block access
+            const preferredDomains = [
+              'golfdigest.com',
+              'golf.com',
+              'pga.com',
+              'golfchannel.com',
+              'golfwrx.com',
+              'mygolfspy.com',
+              'golf.com',
+              'golfdigest.sports.sndimg.com',
+              'cdn11.bigcommerce.com',
+              'golfdiscount.com'
+            ];
+            
+            // Try to find an image from a preferred domain
+            for (const result of searchResults.images_results) {
+              const url = result.original;
+              if (url && preferredDomains.some(domain => url.includes(domain))) {
+                imageUrl = url;
+                break;
+              }
+            }
+            
+            // If no preferred domain found, use the first result
+            if (!imageUrl) {
+              imageUrl = searchResults.images_results[0]?.original;
+            }
+          }
           
           // Validate OpenAI results and parse JSON - handle markdown code blocks
           let jsonData;

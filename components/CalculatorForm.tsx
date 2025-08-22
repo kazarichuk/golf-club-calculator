@@ -26,7 +26,10 @@ export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
   const [userInput, setUserInput] = useState<UserInput>({
     handicap: 20,
     goal: 'Forgiveness',
-    budget: 'Mid-range'
+    budget: 'Mid-range',
+    preferredBrand: '',
+    age: undefined,
+    clubSpeed: undefined
   });
 
   return (
@@ -139,6 +142,52 @@ export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
               </Label>
             </div>
           </RadioGroup>
+        </div>
+
+        {/* Optional Section */}
+        <hr className="my-4" />
+        <div className="grid gap-4">
+          <h3 className="text-lg font-semibold">Optional Information</h3>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="preferredBrand">Preferred Brand (optional)</Label>
+            <input
+              type="text"
+              id="preferredBrand"
+              value={userInput.preferredBrand || ''}
+              onChange={(e) => setUserInput(prev => ({ ...prev, preferredBrand: e.target.value }))}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="e.g., TaylorMade, Callaway, Titleist"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="age">Age (optional)</Label>
+            <input
+              type="number"
+              id="age"
+              value={userInput.age || ''}
+              onChange={(e) => setUserInput(prev => ({ ...prev, age: e.target.value ? parseInt(e.target.value) : undefined }))}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Your age"
+              min="1"
+              max="120"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="clubSpeed">Club Head Speed (mph) (optional)</Label>
+            <input
+              type="number"
+              id="clubSpeed"
+              value={userInput.clubSpeed || ''}
+              onChange={(e) => setUserInput(prev => ({ ...prev, clubSpeed: e.target.value ? parseInt(e.target.value) : undefined }))}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Your average club head speed"
+              min="50"
+              max="150"
+            />
+          </div>
         </div>
       </CardContent>
       <CardFooter>

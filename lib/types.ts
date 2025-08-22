@@ -40,6 +40,9 @@ export interface UserInput {
   handicap: number;
   goal: 'Distance' | 'Accuracy' | 'Forgiveness' | 'Feel';
   budget: 'Budget' | 'Mid-range' | 'Premium';
+  preferredBrand?: string;
+  age?: number;
+  clubSpeed?: number;
 }
 
 /**

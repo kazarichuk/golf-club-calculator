@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { RecommendationResult } from "@/lib/types";
 import { Star, TrendingUp, DollarSign, Crown } from "lucide-react";
 import Image from "next/image";
@@ -62,7 +63,7 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                   <div>
                     <CardTitle className="text-lg">{club.model}</CardTitle>
                     <CardDescription className="text-sm">{club.brand}</CardDescription>
-                    {club.approximatePrice && club.approximatePrice > 0 && (
+                    {club.approximatePrice !== undefined && club.approximatePrice !== null && club.approximatePrice > 0 && (
                       <div className="text-2xl font-bold text-primary pt-2">
                         {new Intl.NumberFormat('en-US', {
                           style: 'currency',
@@ -82,16 +83,20 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                 {/* Golf Club Image */}
                 {club.imageUrl && (
                   <div className="mt-4 flex justify-center">
-                    <div className="w-full h-48 bg-white rounded-lg overflow-hidden flex items-center justify-center">
+                    <div className="w-full h-48 bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200">
                       <Image
-                        src={club.imageUrl}
+                        src={`/api/image-proxy?url=${encodeURIComponent(club.imageUrl)}`}
                         alt={`${club.brand} ${club.model}`}
                         width={200}
                         height={150}
                         className="object-contain max-w-full max-h-full"
                         onError={(e) => {
-                          // Fallback to a simple golf club icon if image fails to load
-                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8cGF0aCBkPSJNMTgwIDE0MEgyMjBWMjAwSDE4MFYxNDBaIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiNEN0Q5RDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8dGV4dCB4PSIyMDAiIHk9IjI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjc3Mzc1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Hb2xmIENsdWI8L3RleHQ+Cjwvc3ZnPgo=';
+                          console.log(`Image failed to load for ${club.brand} ${club.model}:`, club.imageUrl);
+                          // Fallback to a better golf club icon
+                          e.currentTarget.src = '/golf-club-placeholder.svg';
+                        }}
+                        onLoad={() => {
+                          console.log(`Image loaded successfully for ${club.brand} ${club.model}`);
                         }}
                       />
                     </div>
@@ -135,10 +140,57 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                   Match Score: {club.matchScore}%
                 </div>
               </div>
+              
+              <CardFooter>
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => {
+                    // Construct search query for golf stores selling this specific club
+                    const searchQuery = `golf stores selling ${club.brand} ${club.model}`;
+                    
+                    // URL-encode the query to make it safe for URLs
+                    const encodedQuery = encodeURIComponent(searchQuery);
+                    
+                    // Create Google Maps URL with the search query
+                    const mapsUrl = `https://www.google.com/maps/search/${encodedQuery}`;
+                    
+                    // Open Google Maps in a new browser tab
+                    window.open(mapsUrl, '_blank');
+                  }}
+                >
+                  Find a Store
+                </Button>
+              </CardFooter>
             </Card>
           ))
         )}
       </div>
+      
+      {/* 2025 Banner - Only show when there are results */}
+      {results.length > 0 && (
+        <div className="mt-12 mb-8">
+          <div className="flex justify-center">
+            <div className="w-full max-w-4xl">
+              <a 
+                href="https://procaddie.ai/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block transition-transform hover:scale-105 duration-300"
+              >
+                <Image
+                  src="/banner-svg-2025.svg"
+                  alt="2025 Golf Season - Click to visit ProCaddie"
+                  width={800}
+                  height={502}
+                  className="w-full h-auto rounded-lg shadow-lg cursor-pointer"
+                  priority
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
