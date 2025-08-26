@@ -179,7 +179,7 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
                 className="block transition-transform hover:scale-105 duration-300"
               >
                 <Image
-                  src="/banner-svg-2025.svg"
+                  src="/banner-svg-2025-v.2.svg"
                   alt="2025 Golf Season - Click to visit ProCaddie"
                   width={800}
                   height={502}

@@ -42,7 +42,7 @@ export interface UserInput {
   budget: 'Budget' | 'Mid-range' | 'Premium';
   preferredBrand?: string;
   age?: number;
-  clubSpeed?: number;
+  swingSpeed?: 'Slow' | 'Average' | 'Fast' | 'Very Fast';
 }
 
 /**

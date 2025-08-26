@@ -20,15 +20,13 @@ export function Header() {
             />
           </div>
 
-          {/* Join Now Button */}
+          {/* Find Irons Button */}
           <Button 
-            className="bg-[#39934D] hover:bg-[#2d7a3d] text-white text-xs sm:text-sm"
+            className="bg-[#39934D] hover:bg-[#2d7a3d] text-white text-xs sm:text-sm font-semibold"
             size="sm"
-            asChild
+            onClick={() => document.getElementById('calculator-form')?.scrollIntoView({ behavior: 'smooth' })}
           >
-            <a href="https://procaddie.ai/" target="_blank" rel="noopener noreferrer">
-              Join Now
-            </a>
+            ⚡ Find Irons Now - FREE
           </Button>
         </div>
       </div>

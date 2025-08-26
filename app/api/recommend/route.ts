@@ -67,8 +67,8 @@ export async function POST(request: Request) {
       searchPrompt += `\n- Age: ${userInput.age} years old`;
     }
     
-    if (userInput.clubSpeed) {
-      searchPrompt += `\n- Club head speed: ${userInput.clubSpeed} mph`;
+    if (userInput.swingSpeed) {
+      searchPrompt += `\n- The player describes their swing as ${userInput.swingSpeed}.`;
     }
     
     searchPrompt += `\n\nFocus on models available in 2023 or earlier to ensure accuracy. Consider the budget constraint: Budget clubs should be under $500, Mid-range clubs should be $500-$1000, and Premium clubs can be over $1000. For age and club speed, consider that older players or those with slower swing speeds typically benefit from more forgiving clubs with lighter shafts. Return ONLY a valid JSON array of the model names. Example: ["TaylorMade Stealth", "Callaway Apex", "Titleist T200"]`;
@@ -144,11 +144,11 @@ export async function POST(request: Request) {
                              (userInput.age >= 40 && userInput.age < 50 && (club.category === 'Game Improvement' || club.category === "Player's Distance")) ||
                              (userInput.age < 40);
             
-            // Filter by club speed
-            const matchesSpeed = !userInput.clubSpeed || 
-                               (userInput.clubSpeed < 80 && (club.category === 'Game Improvement' || club.category === 'Super Game Improvement')) ||
-                               (userInput.clubSpeed >= 80 && userInput.clubSpeed < 95 && (club.category === 'Game Improvement' || club.category === "Player's Distance")) ||
-                               (userInput.clubSpeed >= 95);
+            // Filter by swing speed
+            const matchesSpeed = !userInput.swingSpeed || 
+                               (userInput.swingSpeed === 'Slow' && (club.category === 'Game Improvement' || club.category === 'Super Game Improvement')) ||
+                               (userInput.swingSpeed === 'Average' && (club.category === 'Game Improvement' || club.category === "Player's Distance")) ||
+                               (userInput.swingSpeed === 'Fast' || userInput.swingSpeed === 'Very Fast');
             
             return isGoodForHandicap && matchesBrand && matchesBudget && matchesAge && matchesSpeed;
           })
@@ -205,21 +205,21 @@ export async function POST(request: Request) {
       return true;
     };
     
-    // E. Club speed filtering function
+    // E. Swing speed filtering function
     const matchesClubSpeed = (club: typeof schema.manufacturs.$inferSelect): boolean => {
-      if (!userInput.clubSpeed) {
-        return true; // No club speed specified, so all clubs match
+      if (!userInput.swingSpeed) {
+        return true; // No swing speed specified, so all clubs match
       }
       
-      // Club speed-based logic: slower swings need more forgiving clubs
-      if (userInput.clubSpeed < 80) {
+      // Swing speed-based logic: slower swings need more forgiving clubs
+      if (userInput.swingSpeed === 'Slow') {
         // Slow swing speeds benefit from Game Improvement clubs
         return club.category === 'Game Improvement' || club.category === 'Super Game Improvement';
-      } else if (userInput.clubSpeed < 95) {
-        // Medium swing speeds can use Game Improvement or Player's Distance
+      } else if (userInput.swingSpeed === 'Average') {
+        // Average swing speeds can use Game Improvement or Player's Distance
         return club.category === 'Game Improvement' || club.category === "Player's Distance";
       }
-      // Fast swing speeds can use any category
+      // Fast and Very Fast swing speeds can use any category
       return true;
     };
     
@@ -260,7 +260,7 @@ export async function POST(request: Request) {
             if (!budgetMatch) mismatches.push(`budget: ${matchingClub.pricePoint} vs ${userInput.budget}`);
             if (!brandMatch) mismatches.push(`brand: ${matchingClub.brand} vs ${userInput.preferredBrand}`);
             if (!ageMatch) mismatches.push(`age: ${userInput.age} vs category ${matchingClub.category}`);
-            if (!speedMatch) mismatches.push(`speed: ${userInput.clubSpeed} vs category ${matchingClub.category}`);
+            if (!speedMatch) mismatches.push(`swing speed: ${userInput.swingSpeed} vs category ${matchingClub.category}`);
             
             console.log(`✗ Found in DB but criteria mismatch: ${matchingClub.model} (${mismatches.join(', ')})`);
             missingClubNames.push(modelName); // Add to missing to find better alternatives
@@ -300,7 +300,7 @@ export async function POST(request: Request) {
             new Promise<any>((resolve, reject) => {
               const search = new GoogleSearch(process.env.SERPAPI_API_KEY);
               search.json({
-                q: `${name} golf club iron ${userInput.budget} price ${userInput.preferredBrand ? userInput.preferredBrand + ' ' : ''}${userInput.age ? userInput.age + ' age ' : ''}${userInput.clubSpeed ? userInput.clubSpeed + ' mph ' : ''}official product image`,
+                q: `${name} golf club iron ${userInput.budget} price ${userInput.preferredBrand ? userInput.preferredBrand + ' ' : ''}${userInput.age ? userInput.age + ' age ' : ''}${userInput.swingSpeed ? userInput.swingSpeed + ' swing ' : ''}official product image`,
                 engine: 'google_images',
                 num: 5, // Get more results to find better sources
                 safe: 'active',
@@ -319,7 +319,7 @@ export async function POST(request: Request) {
             (async () => {
               const dataPrompt = `You are a golf equipment data expert. For the club named "${name}", provide a JSON object with the following keys: "category" (one of ["Game Improvement", "Player's Distance", "Player's Iron", "Blade"]), "handicapRangeMin" (number), "handicapRangeMax" (number), "keyStrengths" (an array of strings), "pricePoint" (one of ["Budget", "Mid-range", "Premium"]), and "approximatePriceUSD" (a number representing the approximate retail price in USD). 
 
-User context: Budget is ${userInput.budget}${userInput.preferredBrand ? `, preferred brand is ${userInput.preferredBrand}` : ''}${userInput.age ? `, age is ${userInput.age} years old` : ''}${userInput.clubSpeed ? `, club head speed is ${userInput.clubSpeed} mph` : ''}.
+User context: Budget is ${userInput.budget}${userInput.preferredBrand ? `, preferred brand is ${userInput.preferredBrand}` : ''}${userInput.age ? `, age is ${userInput.age} years old` : ''}${userInput.swingSpeed ? `, swing speed is ${userInput.swingSpeed}` : ''}.
 
 For pricePoint, consider that Budget should be under $500, Mid-range should be $500-$1000, and Premium should be over $1000. For category, consider that older players (50+) and slower swing speeds (<80 mph) typically benefit from Game Improvement clubs, while younger players with faster swings can use Player's Distance or Player's Iron clubs. Return ONLY the valid JSON object.`;
               

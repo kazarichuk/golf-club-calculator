@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,38 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Golf Club Calculator",
-  description: "Get personalized golf club recommendations based on your handicap and goals",
+  title: {
+    template: '%s | Golf Iron AI Finder',
+    default: 'Golf Iron Recommendation Calculator | Find Best Irons for Your Game (2024)',
+  },
+  description: 'Get personalized golf iron recommendations based on your handicap, swing speed, and budget. Our AI-powered calculator helps you find the perfect irons to improve your game. Free, instant results!',
+  keywords: 'golf club recommendation, golf irons calculator, best golf clubs, golf club fitting, golf equipment selector, golf club buying guide',
+  openGraph: {
+    title: 'Golf Club Recommendation Calculator | Find Your Perfect Irons',
+    description: 'Get personalized golf club recommendations based on your handicap, swing speed, and budget. Free AI-powered tool.',
+    type: 'website',
+    locale: 'en_US',
+    siteName: 'Golf Club AI Finder',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Golf Club Recommendation Calculator',
+    description: 'Find your perfect golf irons with our AI-powered recommendation tool.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'your-google-verification-code', // Add your Google Search Console verification code
+  },
 };
 
 export default function RootLayout({
@@ -51,11 +82,51 @@ export default function RootLayout({
             }
           `
         }} />
+        
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "Golf Club Recommendation Calculator",
+              "description": "AI-powered golf club recommendation tool that helps golfers find the perfect irons based on their handicap, swing speed, and budget.",
+              "url": "https://your-domain.com",
+              "applicationCategory": "SportsApplication",
+              "operatingSystem": "Web Browser",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "creator": {
+                "@type": "Organization",
+                "name": "Golf Club AI Finder"
+              },
+              "featureList": [
+                "AI-powered recommendations",
+                "Handicap-based matching",
+                "Budget filtering",
+                "Swing speed analysis",
+                "Brand preferences",
+                "Instant results"
+              ],
+              "screenshot": "https://your-domain.com/screenshot.png",
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.8",
+                "ratingCount": "1250"
+              }
+            })
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );

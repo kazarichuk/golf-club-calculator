@@ -29,11 +29,11 @@ export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
     budget: 'Mid-range',
     preferredBrand: '',
     age: undefined,
-    clubSpeed: undefined
+    swingSpeed: undefined
   });
 
   return (
-    <Card className="w-full max-w-lg mx-auto relative">
+    <Card id="calculator-form" className="w-full max-w-lg mx-auto relative">
       {isLoading && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
           <div className="flex flex-col items-center gap-2">
@@ -176,17 +176,45 @@ export function CalculatorForm({ onSubmit, isLoading }: CalculatorFormProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="clubSpeed">Club Head Speed (mph) (optional)</Label>
-            <input
-              type="number"
-              id="clubSpeed"
-              value={userInput.clubSpeed || ''}
-              onChange={(e) => setUserInput(prev => ({ ...prev, clubSpeed: e.target.value ? parseInt(e.target.value) : undefined }))}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              placeholder="Your average club head speed"
-              min="50"
-              max="150"
-            />
+            <Label>What does your Driver swing feel like?</Label>
+            <RadioGroup value={userInput.swingSpeed} onValueChange={(value) => setUserInput(prev => ({ ...prev, swingSpeed: value as UserInput['swingSpeed'] }))} className="grid grid-cols-2 gap-4">
+              <div>
+                <RadioGroupItem value="Slow" id="s-slow" className="peer sr-only" />
+                <Label
+                  htmlFor="s-slow"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  Slow / Deliberate
+                </Label>
+              </div>
+              <div>
+                <RadioGroupItem value="Average" id="s-average" className="peer sr-only" />
+                <Label
+                  htmlFor="s-average"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  Average / Smooth
+                </Label>
+              </div>
+              <div>
+                <RadioGroupItem value="Fast" id="s-fast" className="peer sr-only" />
+                <Label
+                  htmlFor="s-fast"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  Fast / Aggressive
+                </Label>
+              </div>
+              <div>
+                <RadioGroupItem value="Very Fast" id="s-very-fast" className="peer sr-only" />
+                <Label
+                  htmlFor="s-very-fast"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  Very Fast / Powerful
+                </Label>
+              </div>
+            </RadioGroup>
           </div>
         </div>
       </CardContent>

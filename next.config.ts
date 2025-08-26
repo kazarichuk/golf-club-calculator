@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
   experimental: {
-    typedRoutes: true,
+    // typedRoutes: true, // Temporarily disabled for Turbopack compatibility
   },
   images: {
     remotePatterns: [
